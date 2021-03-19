@@ -1,4 +1,5 @@
-import datetime, time
+import datetime
+import time
 
 import requests
 
@@ -13,6 +14,28 @@ class Ticket:
     def data(self) -> dict:
         """Return ticket data."""
         return self._data
+
+    def has_tag(self, tag: str) -> bool:
+        """Return True if the ticket has the given tag, 
+        False otherwise.
+        """
+        return tag in self._data['tags']
+
+    def has_text(self, text: str) -> bool:
+        """Return True if the text is in the subject or 
+        first comment of the ticket, False otherwise.
+        """
+        return text in self._data['description'] or text in self._data['subject']
+
+    def has_status(self, status: 'open' or 'pending' or 'solved' or 'closed') -> bool:
+        """Return True if the ticket has the given status, False otherwise."""
+        return self._data['status'] == status
+
+    def in_group(self, group_id: int) -> bool:
+        """Return True if the ticket is in the given group, 
+        False otherwise.
+        """
+        return self._data['group_id'] == group_id
 
 
 class Zendesk:
