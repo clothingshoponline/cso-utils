@@ -4,8 +4,9 @@ package = dict()
 with open('cso_utils/__version__.py', 'r') as f:
     version_data = f.read()
 for line in version_data.split('\n'):
-    key, value = line.split(' = ')
-    package[key] = value.replace("'", '').strip()
+    if ' = ' in line:
+        key, value = line.split(' = ')
+        package[key] = value.replace("'", '').strip()
 
 
 setup(name=package['__title__'],
