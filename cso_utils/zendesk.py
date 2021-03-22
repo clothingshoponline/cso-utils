@@ -42,7 +42,7 @@ class Zendesk:
     def authenticate(self, subdomain: str, email: str, token: str) -> None:
         self._subdomain = subdomain
         self._auth = (email + '/token', token)
-        self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets.json'
+        self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
     def create_ticket_and_send_to_customer(self, customer_email: str, subject: str, 
                                            html_message: str, group_id: str,
