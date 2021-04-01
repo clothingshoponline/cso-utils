@@ -2,7 +2,7 @@ import requests
 
 
 class Order:
-    def __init__(self, json_data: dict):
+    def __init__(self, json_data: [dict]):
         self._data = json_data
 
     def __repr__(self) -> str:
@@ -28,13 +28,17 @@ class SSActivewear:
                                 auth=self._auth, 
                                 headers=self._headers)
         response.raise_for_status()
+        return Order(self._filter(response.json()))
+
+    def _filter(self, response: dict) -> [dict]:
+        """Filter out items with the wrong PO, returns, or cancelled orders."""
         data = []
-        for package in response.json():
+        for package in response:
             if (package['poNumber'] == po_number 
                 and package['orderType'] != 'Credit' 
                 and package['orderStatus'] != 'Cancelled'):
                 data.append(package)
-        return Order(data)
+        return data
 
     def full_return(self, po_number: str, reason_code: int, 
                     reason_comment: str, test: bool) -> (str, dict):
