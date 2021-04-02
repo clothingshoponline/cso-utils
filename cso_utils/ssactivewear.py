@@ -28,9 +28,9 @@ class SSActivewear:
                                 auth=self._auth, 
                                 headers=self._headers)
         response.raise_for_status()
-        return Order(self._filter(response.json()))
+        return Order(self._filter(po_number, response.json()))
 
-    def _filter(self, response: dict) -> [dict]:
+    def _filter(self, po_number: str, response: dict) -> [dict]:
         """Filter out items with the wrong PO, returns, or cancelled orders."""
         data = []
         for package in response:
