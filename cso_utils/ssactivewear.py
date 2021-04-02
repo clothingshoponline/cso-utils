@@ -12,6 +12,18 @@ class Order:
         """Return order data."""
         return self._data
 
+    def lines(self) -> [dict]:
+        """Return a list of lines where each line 
+        has invoice, sku, and qty.
+        """
+        lines = []
+        for package in self._data:
+            for line in package['lines']:
+                lines.append({'invoice': package['invoiceNumber'], 
+                              'sku': line['sku'], 
+                              'qty': line['qtyShipped']})
+        return lines
+
 
 class SSActivewear:
     def __init__(self, account: str, password: str):
@@ -45,15 +57,14 @@ class SSActivewear:
         """Request a full return. Return (RA number, shipping address)."""
         original_order = self.get_order(po_number)
         lines = []
-        for package in original_order.data():
-            for line in package['lines']:
-                lines.append({'invoiceNumber': package['invoiceNumber'], 
-                              'identifier': line['sku'], 
-                              'qty': line['qtyShipped'], 
-                              'showBoxes': False, 
-                              'returnReason': reason_code, 
-                              'isReplace': False, 
-                              'returnReasonComment': reason_comment})
+        for line in original_order.lines():
+            lines.append({'invoiceNumber': line['invoice'], 
+                          'identifier': line['sku'], 
+                          'qty': line['qty'], 
+                          'showBoxes': False, 
+                          'returnReason': reason_code, 
+                          'isReplace': False, 
+                          'returnReasonComment': reason_comment})
         data = {'emailConfirmation': '', 
                 'testOrder': test, 
                 'shippingLabelRequired': False, 
