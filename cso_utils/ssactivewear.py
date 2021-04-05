@@ -54,7 +54,8 @@ class SSActivewear:
         return data
 
     def full_return(self, po_number: str, reason_code: int, 
-                    reason_comment: str, test: bool) -> (str, dict):
+                    reason_comment: str, test: bool, 
+                    return_warehouses: [str] = None) -> (str, dict):
         """Request a full return. Return (RA number, shipping address)."""
         original_order = self.get_order(po_number)
         lines = []
@@ -70,6 +71,8 @@ class SSActivewear:
                 'testOrder': test, 
                 'shippingLabelRequired': False, 
                 'lines': lines}
+        if return_warehouses:
+            data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
                                  auth=self._auth, 
                                  json=data)
