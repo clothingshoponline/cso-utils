@@ -14,14 +14,15 @@ class Order:
 
     def lines(self) -> [dict]:
         """Return a list of lines where each line 
-        has invoice, sku, and qty.
+        has invoice, sku, qty_ordered and qty_shipped.
         """
         lines = []
         for package in self._data:
             for line in package['lines']:
                 lines.append({'invoice': package['invoiceNumber'], 
                               'sku': line['sku'], 
-                              'qty': line['qtyShipped']})
+                              'qty_ordered': line['qtyOrdered'], 
+                              'qty_shipped': line['qtyShipped']})
         return lines
 
 
@@ -60,7 +61,7 @@ class SSActivewear:
         for line in original_order.lines():
             lines.append({'invoiceNumber': line['invoice'], 
                           'identifier': line['sku'], 
-                          'qty': line['qty'], 
+                          'qty': line['qty_shipped'], 
                           'showBoxes': False, 
                           'returnReason': reason_code, 
                           'isReplace': False, 

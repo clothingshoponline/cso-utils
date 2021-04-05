@@ -11,18 +11,18 @@ class TestOrder:
 
     def test_lines(self):
         item1 = {'invoiceNumber': '1', 
-                 'lines': [{'sku': '2', 'qtyShipped': 1}]}
+                 'lines': [{'sku': '2', 'qtyOrdered': 5, 'qtyShipped': 1}]}
         item2 = {'invoiceNumber': '3', 
-                 'lines': [{'sku': '4', 'qtyShipped': 2}, 
-                           {'sku': '5', 'qtyShipped': 3}, 
-                           {'sku': '6', 'qtyShipped': 4}]}
+                 'lines': [{'sku': '4', 'qtyOrdered': 6, 'qtyShipped': 2}, 
+                           {'sku': '5', 'qtyOrdered': 7, 'qtyShipped': 3}, 
+                           {'sku': '6', 'qtyOrdered': 8, 'qtyShipped': 4}]}
         order1 = ssactivewear.Order([item1])
         order2 = ssactivewear.Order([item1, item2])
-        assert order1.lines() == [{'invoice': '1', 'sku': '2', 'qty': 1}]
-        assert order2.lines() == [{'invoice': '1', 'sku': '2', 'qty': 1}, 
-                                  {'invoice': '3', 'sku': '4', 'qty': 2}, 
-                                  {'invoice': '3', 'sku': '5', 'qty': 3}, 
-                                  {'invoice': '3', 'sku': '6', 'qty': 4}]
+        assert order1.lines() == [{'invoice': '1', 'sku': '2', 'qty_ordered': 5, 'qty_shipped': 1}]
+        assert order2.lines() == [{'invoice': '1', 'sku': '2', 'qty_ordered': 5, 'qty_shipped': 1}, 
+                                  {'invoice': '3', 'sku': '4', 'qty_ordered': 6, 'qty_shipped': 2}, 
+                                  {'invoice': '3', 'sku': '5', 'qty_ordered': 7, 'qty_shipped': 3}, 
+                                  {'invoice': '3', 'sku': '6', 'qty_ordered': 8, 'qty_shipped': 4}]
 
 class TestSSActivewear:
     def test_filter(self):
