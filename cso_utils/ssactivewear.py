@@ -14,14 +14,15 @@ class Order:
 
     def lines(self) -> [dict]:
         """Return a list of lines where each line 
-        has invoice, sku, and qty.
+        has invoice, sku, qty_ordered and qty_shipped.
         """
         lines = []
         for package in self._data:
             for line in package['lines']:
                 lines.append({'invoice': package['invoiceNumber'], 
                               'sku': line['sku'], 
-                              'qty': line['qtyShipped']})
+                              'qty_ordered': line['qtyOrdered'], 
+                              'qty_shipped': line['qtyShipped']})
         return lines
 
 
@@ -53,14 +54,15 @@ class SSActivewear:
         return data
 
     def full_return(self, po_number: str, reason_code: int, 
-                    reason_comment: str, test: bool) -> (str, dict):
+                    reason_comment: str, test: bool, 
+                    return_warehouses: [str] = None) -> (str, dict):
         """Request a full return. Return (RA number, shipping address)."""
         original_order = self.get_order(po_number)
         lines = []
         for line in original_order.lines():
             lines.append({'invoiceNumber': line['invoice'], 
                           'identifier': line['sku'], 
-                          'qty': line['qty'], 
+                          'qty': line['qty_shipped'], 
                           'showBoxes': False, 
                           'returnReason': reason_code, 
                           'isReplace': False, 
@@ -69,6 +71,8 @@ class SSActivewear:
                 'testOrder': test, 
                 'shippingLabelRequired': False, 
                 'lines': lines}
+        if return_warehouses:
+            data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
                                  auth=self._auth, 
                                  json=data)
