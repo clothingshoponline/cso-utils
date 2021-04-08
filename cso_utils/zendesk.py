@@ -37,6 +37,12 @@ class Ticket:
         """
         return self._data['group_id'] == group_id
 
+    def sent_from(self, email: str) -> bool:
+        """Return True if the ticket was sent from the 
+        given email, False otherwise.
+        """
+        return (self._data['via']['channel'] == 'email' 
+                and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
     def authenticate(self, subdomain: str, email: str, token: str) -> None:
