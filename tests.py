@@ -36,3 +36,17 @@ class TestSSActivewear:
                     {'poNumber': '222', 'orderType': 'Credit', 'orderStatus': 'Cancelled'}]
         ssapi = ssactivewear.SSActivewear('test', 'test')
         assert ssapi._filter('111', response) == response[:1]
+
+
+from cso_utils import zendesk
+
+class TestTicket:
+    def test_sent_from(self):
+        email = 'someone@example.com'
+        ticket1 = zendesk.Ticket({'via': {'channel': 'email', 
+                                          'source': {'from': {'address': email}}}})
+        ticket2 = zendesk.Ticket({'via': {'channel': 'api', 
+                                          'source': {'from': {}}}})
+        assert ticket1.sent_from(email)
+        assert not ticket1.sent_from('bla')
+        assert not ticket2.sent_from(email)
