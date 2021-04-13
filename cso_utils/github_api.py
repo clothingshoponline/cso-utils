@@ -34,6 +34,5 @@ def create_bug_report(token: str, repo_name: str) -> None:
 
     g = github.Github(token)
     repo = g.get_repo('clothingshoponline/' + repo_name)
-    label = repo.get_label('bug')
     issue = repo.create_issue(title=title, body=f'<pre>{body}</pre>')
-    issue.edit(labels=[label])
+    issue.edit(labels=['bug'])
