@@ -1,4 +1,4 @@
-# cso-utils v3.1.1
+# cso-utils v3.2.0
 
 This package contains wrappers for commonly used API calls from the S&S Activewear, Github, and Zendesk APIs.
 
@@ -11,7 +11,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 ## Installation
 
 ```
-pip install git+https://github.com/clothingshoponline/cso-utils.git@v3.1.1
+pip install git+https://github.com/clothingshoponline/cso-utils.git@v3.2.0
 ```
 
 ## Usage
