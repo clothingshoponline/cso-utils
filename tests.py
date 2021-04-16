@@ -50,3 +50,10 @@ class TestTicket:
         assert ticket1.sent_from(email)
         assert not ticket1.sent_from('bla')
         assert not ticket2.sent_from(email)
+
+class TestZendesk:
+    def test_init(self):
+        zen = zendesk.Zendesk('subdomain', 'someone@example.com', 'token1')
+        assert zen._subdomain == 'subdomain'
+        assert zen._auth == ('someone@example.com/token', 'token1')
+        assert zen._url == 'https://subdomain.zendesk.com/api/v2/tickets'
