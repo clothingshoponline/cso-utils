@@ -70,7 +70,8 @@ class SSActivewear:
         data = {'emailConfirmation': '', 
                 'testOrder': test, 
                 'shippingLabelRequired': False, 
-                'lines': lines}
+                'lines': lines, 
+                'OverrideRestockFee': True}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
