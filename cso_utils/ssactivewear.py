@@ -58,8 +58,18 @@ class SSActivewear:
                     return_warehouses: [str] = None) -> (str, dict):
         """Request a full return. Return (RA number, shipping address)."""
         original_order = self.get_order(po_number)
+        ra, address = _return_request(original_order.lines(), reason_code, 
+                                      reason_comment, test, return_warehouses)
+        return (ra, address)
+
+    def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}], 
+                        reason_code: int, reason_comment: str, test: bool, 
+                        return_warehouses: [str] = None) -> (str, dict):
+        """Create return request and send to API. Return (RA number, 
+        shipping address).
+        """
         lines = []
-        for line in original_order.lines():
+        for line in lines_to_return:
             lines.append({'invoiceNumber': line['invoice'], 
                           'identifier': line['sku'], 
                           'qty': line['qty_shipped'], 
