@@ -58,13 +58,24 @@ class SSActivewear:
                     return_warehouses: [str] = None) -> (str, dict):
         """Request a full return. Return (RA number, shipping address)."""
         original_order = self.get_order(po_number)
-        ra, address = _return_request(original_order.lines(), reason_code, 
-                                      reason_comment, test, return_warehouses)
+        ra, address = self._return_request(original_order.lines(), reason_code, 
+                                           reason_comment, test, return_warehouses)
+        return (ra, address)
+
+    def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int, 
+                       reason_comment: str, test: bool, 
+                       return_warehouses: [str] = None) -> (str, dict):
+        """Request a partial return. Return (RA number, shipping address)."""
+        original_order = self.get_order(po_number)
+        lines_with_invoice = self._match_skus_with_invoice(original_order.lines(), 
+                                                           skus_and_qtys)
+        ra, address = self._return_request(lines_with_invoice, reason_code, 
+                                           reason_comment, test, return_warehouses)
         return (ra, address)
 
     def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}], 
                         reason_code: int, reason_comment: str, test: bool, 
-                        return_warehouses: [str] = None) -> (str, dict):
+                        return_warehouses: [str] or None) -> (str, dict):
         """Create return request and send to API. Return (RA number, 
         shipping address).
         """
@@ -90,3 +101,21 @@ class SSActivewear:
         response.raise_for_status()
         return_info = response.json()[0]['returnInformation']
         return (return_info['raNumber'], return_info['returnToAddress'])
+
+    def _match_skus_with_invoice(self, 
+                                 original_lines: [{'invoice': str, 'sku': str, 'qty_shipped': int}],
+                                 skus_and_qtys: {str: int}) -> [dict]:
+        """Match skus with invoices from original order. Return [dict] where each dict 
+        has invoice, sku, and qty_shipped.
+        """
+        lines_with_invoice = []
+        for original_line in original_lines:
+            sku = original_line['sku']
+            if sku in skus_and_qtys and original_line['qty_shipped'] >= skus_and_qtys[sku]:
+                lines_with_invoice.append({'invoice': original_line['invoice'], 
+                                           'sku': sku, 
+                                           'qty_shipped': skus_and_qtys[sku]})
+                del skus_and_qtys[sku]
+        if len(skus_and_qtys) != 0:
+            raise ValueError('sku or qty not in original order')
+        return lines_with_invoice
