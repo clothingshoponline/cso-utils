@@ -56,7 +56,8 @@ class Zendesk:
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
                                            html_message: str, group_id: str,
-                                           tags: [str], assignee_email: str = None) -> str:
+                                           tags: [str], assignee_email: str = None, 
+                                           zendesk_support_email: str = None) -> str:
         """Create a new ticket and send the message to the customer. 
         Return the ID of the new ticket. 
         """
@@ -65,6 +66,8 @@ class Zendesk:
                            'comment': {'html_body': html_message, 'public': False}}}
         if assignee_email:
             data['ticket']['assignee_email'] = assignee_email
+        if zendesk_support_email:
+            data['ticket']['recipient'] = zendesk_support_email
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()['ticket']['id'])
