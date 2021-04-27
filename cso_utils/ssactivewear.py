@@ -84,15 +84,16 @@ class SSActivewear:
             lines.append({'invoiceNumber': line['invoice'], 
                           'identifier': line['sku'], 
                           'qty': line['qty_shipped'], 
-                          'showBoxes': False, 
                           'returnReason': reason_code, 
                           'isReplace': False, 
                           'returnReasonComment': reason_comment})
         data = {'emailConfirmation': '', 
                 'testOrder': test, 
                 'shippingLabelRequired': False, 
+                'showBoxes': False, 
                 'lines': lines, 
-                'OverrideRestockFee': True}
+                'OverrideRestockFee': True, 
+                'AllowOverrideHandling': True}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
