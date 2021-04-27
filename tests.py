@@ -1,3 +1,5 @@
+import pytest
+
 from cso_utils import ssactivewear
 
 class TestOrder:
@@ -36,6 +38,37 @@ class TestSSActivewear:
                     {'poNumber': '222', 'orderType': 'Credit', 'orderStatus': 'Cancelled'}]
         ssapi = ssactivewear.SSActivewear('test', 'test')
         assert ssapi._filter('111', response) == response[:1]
+
+    def test_match_skus_with_invoice(self):
+        original_lines = [{'invoice': '0', 'sku': '2', 'qty_shipped': 11}, 
+                          {'invoice': '0', 'sku': '3', 'qty_shipped': 12}, 
+                          {'invoice': '0', 'sku': '4', 'qty_shipped': 13}, 
+                          {'invoice': '1', 'sku': '5', 'qty_shipped': 14}, 
+                          {'invoice': '1', 'sku': '6', 'qty_shipped': 15}, 
+                          {'invoice': '1', 'sku': '7', 'qty_shipped': 16}, 
+                          {'invoice': '1', 'sku': '8', 'qty_shipped': 17}, 
+                          {'invoice': '1', 'sku': '9', 'qty_shipped': 18}]
+        ssapi = ssactivewear.SSActivewear('test', 'test')
+
+        wrong_sku = {'10': 1, '2': 5}
+        with pytest.raises(ValueError, match=r'sku or qty not in original order'):
+            ssapi._match_skus_with_invoice(original_lines, wrong_sku)
+
+        wrong_qty = {'2': 12}
+        with pytest.raises(ValueError, match=r'sku or qty not in original order'):
+            ssapi._match_skus_with_invoice(original_lines, wrong_qty)
+
+        part_of_order = {'2': 5, '7': 4, '9': 9, '3': 12}
+        assert (ssapi._match_skus_with_invoice(original_lines, part_of_order) == 
+                [{'invoice': '0', 'sku': '2', 'qty_shipped': 5}, 
+                 {'invoice': '0', 'sku': '3', 'qty_shipped': 12}, 
+                 {'invoice': '1', 'sku': '7', 'qty_shipped': 4}, 
+                 {'invoice': '1', 'sku': '9', 'qty_shipped': 9}])
+
+        all_of_order = {'2': 11, '3': 12, '4': 13, '5': 14, 
+                        '6': 15, '7': 16, '8': 17, '9': 18}
+        assert ssapi._match_skus_with_invoice(original_lines, all_of_order) == original_lines
+
 
 
 from cso_utils import zendesk

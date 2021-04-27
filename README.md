@@ -1,6 +1,6 @@
 # cso-utils v3.3.0
 
-This package contains wrappers for commonly used API calls from the S&S Activewear, Github, and Zendesk APIs.
+This package contains wrappers for commonly used API calls from the S&S Activewear, Github, ChannelAdvisor, and Zendesk APIs.
 
 ## Requirements
 
@@ -40,4 +40,13 @@ from cso_utils import github_api
 
 ```
 from cso_utils import zendesk
+```
+
+
+### ChannelAdvisor
+
+#### Import
+
+```
+from cso_utils import channeladvisor
 ```
