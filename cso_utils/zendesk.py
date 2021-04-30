@@ -45,7 +45,7 @@ class Ticket:
                 and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
-    def __init__(self, subdomain: str, email: str, token: str):
+    def __init__(self, subdomain: str = '', email: str = '', token: str = ''):
         self.authenticate(subdomain, email, token)
         
     def authenticate(self, subdomain: str, email: str, token: str) -> None:
