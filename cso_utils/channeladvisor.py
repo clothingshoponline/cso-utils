@@ -24,7 +24,7 @@ class ChannelAdvisor:
         """Return a ChannelAdvisorOrder object representing the order 
         with the given order ID.
         """
-        endpoint = f"https://api.channeladvisor.com/v1/Orders?access_token={token}&$expand=Items,Fulfillments&$filter=SiteOrderID eq '{site_order_id}'"
+        endpoint = f"https://api.channeladvisor.com/v1/Orders?access_token={self._token}&$expand=Items,Fulfillments&$filter=SiteOrderID eq '{site_order_id}'"
         response = requests.get(endpoint)
         response.raise_for_status()
         return ChannelAdvisorOrder(response.json()['value'])
