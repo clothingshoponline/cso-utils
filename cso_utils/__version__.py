@@ -1,4 +1,4 @@
-__version__ = '3.4.2'
+__version__ = '3.4.3'
 __pyversion__ = '<3.9'
 __title__ = 'cso_utils'
 __author__ = 'Clothing Shop Online'
