@@ -93,7 +93,7 @@ class SSActivewear:
                 'showBoxes': False, 
                 'lines': lines, 
                 'OverrideRestockFee': True, 
-                'AllowOverrideHandling': True}
+                'OverrideHandling': True}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
