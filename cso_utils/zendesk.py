@@ -15,6 +15,21 @@ class Ticket:
         """Return ticket data."""
         return self._data
 
+    def id_num(self) -> str:
+        """Return the ticket's ID number."""
+        return self._data['id']
+
+    def subject(self) -> str:
+        """Return the ticket's subject."""
+        return self._data['subject']
+
+    def custom_fields(self) -> dict:
+        """Return the custom fields as a dict."""
+        all_custom_fields = dict()
+        for field in self._data['custom_fields']:
+            all_custom_fields[field['id']] = field['value']
+        return all_custom_fields
+    
     def has_tag(self, tag: str) -> bool:
         """Return True if the ticket has the given tag, 
         False otherwise.
@@ -52,6 +67,12 @@ class Zendesk:
         self._subdomain = subdomain
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
+
+    def get_ticket(self, id_number: str) -> Ticket:
+        """Return a Ticket with the given id."""
+        response = requests.get(self._url + '/' + id_number, auth=self._auth)
+        response.raise_for_status()
+        return Ticket(response.json()['ticket'])
 
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
