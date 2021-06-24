@@ -26,6 +26,31 @@ class TestOrder:
                                   {'invoice': '3', 'sku': '5', 'qty_ordered': 7, 'qty_shipped': 3}, 
                                   {'invoice': '3', 'sku': '6', 'qty_ordered': 8, 'qty_shipped': 4}]
 
+    def test_tracking_nums(self):
+        order = ssactivewear.Order([{'trackingNumber': '1'}, {'trackingNumber': '2'}])
+        assert order.tracking_nums() == ['1', '2']
+
+    def test_order_nums(self):
+        order = ssactivewear.Order([{'orderNumber': '3'}, {'orderNumber': '4'}])
+        assert order.order_nums() == ['3', '4']
+
+    def test_invoices(self):
+        order = ssactivewear.Order([{'invoiceNumber': '5'}, {'invoiceNumber': '6'}])
+        assert order.invoices() == ['5', '6']
+
+    def test_guids(self):
+        order = ssactivewear.Order([{'guid': '7'}, {'guid': '8'}])
+        assert order.guids() == ['7', '8']
+        
+    def test_data_nums(self):
+        order1 = ssactivewear.Order([])
+        order2 = ssactivewear.Order([{'invoiceNumber': '9'}])
+        order3 = ssactivewear.Order([{'invoiceNumber': '10'}, {'invoiceNumber': '11'}])
+        assert order1._data_nums('invoiceNumber') == []
+        assert order2._data_nums('invoiceNumber') == ['9']
+        assert order3._data_nums('invoiceNumber') == ['10', '11']
+        
+
 class TestTracking:
     def test_repr(self):
         tracking = ssactivewear.Tracking([{'carrierName': 'A', 'trackingNumber': '1'}])
