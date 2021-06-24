@@ -26,6 +26,25 @@ class TestOrder:
                                   {'invoice': '3', 'sku': '5', 'qty_ordered': 7, 'qty_shipped': 3}, 
                                   {'invoice': '3', 'sku': '6', 'qty_ordered': 8, 'qty_shipped': 4}]
 
+class TestTracking:
+    def test_repr(self):
+        tracking = ssactivewear.Tracking([{'carrierName': 'A', 'trackingNumber': '1'}])
+        assert str(tracking) == "Tracking([{'carrierName': 'A', 'trackingNumber': '1'}])"
+
+    def test_data(self):
+        tracking = ssactivewear.Tracking([{'carrierName': 'A', 'trackingNumber': '1'}])
+        assert tracking.data() == [{'carrierName': 'A', 'trackingNumber': '1'}]
+
+    def test_num_and_status(self):
+        tracking1 = ssactivewear.Tracking([{'trackingNumber': '1', 
+                                            'latestCheckpoint': {'checkpointStatusMessage': 'A'}}])
+        tracking2 = ssactivewear.Tracking([{'trackingNumber': '2', 
+                                            'latestCheckpoint': {'checkpointStatusMessage': 'B'}}, 
+                                           {'trackingNumber': '3', 
+                                            'latestCheckpoint': {'checkpointStatusMessage': 'C'}}])
+        assert tracking1.num_and_status() == [('1', 'A')]
+        assert tracking2.num_and_status() == [('2', 'B'), ('3', 'C')]
+
 class TestSSActivewear:
     def test_filter(self):
         response = [{'poNumber': '111', 'orderType': 'Order', 'orderStatus': 'Shipped'}, 
@@ -74,6 +93,21 @@ class TestSSActivewear:
 from cso_utils import zendesk
 
 class TestTicket:
+    def test_id_num(self):
+        ticket = zendesk.Ticket({'id': '1'})
+        assert ticket.id_num() == '1'
+
+    def test_subject(self):
+        ticket = zendesk.Ticket({'subject': 'Where is my order?'})
+        assert ticket.subject() == 'Where is my order?'
+
+    def test_custom_fields(self):
+        ticket1 = zendesk.Ticket({'custom_fields': [{'id': '1', 'value': '2'}]})
+        ticket2 = zendesk.Ticket({'custom_fields': [{'id': '3', 'value': '4'}, 
+                                                    {'id': '5', 'value': '6'}]})
+        assert ticket1.custom_fields() == {'1': '2'}
+        assert ticket2.custom_fields() == {'3': '4', '5': '6'}
+
     def test_sent_from(self):
         email = 'someone@example.com'
         ticket1 = zendesk.Ticket({'via': {'channel': 'email', 

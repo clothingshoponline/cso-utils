@@ -25,12 +25,55 @@ class Order:
                               'qty_shipped': line['qtyShipped']})
         return lines
 
+    def tracking_nums(self) -> [str]:
+        """Return a list of tracking numbers."""
+        return self._data_nums('trackingNumber')
+
+    def order_nums(self) -> [str]:
+        """Return a list of order numbers."""
+        return self._data_nums('orderNumber')
+
+    def invoices(self) -> [str]:
+        """Return a list of invoice numbers."""
+        return self._data_nums('invoiceNumber')
+
+    def guids(self) -> [str]:
+        """Return a list of guids."""
+        return self._data_nums('guid')
+
+    def _data_nums(self, data_type: str) -> [str]:
+        """Return a list of invoice/order/tracking/guid numbers."""
+        numbers = []
+        for package in self._data:
+            numbers.append(package[data_type])
+        return numbers
+
+
+class Tracking:
+    def __init__(self, json_data: [dict]):
+        self._data = json_data
+
+    def __repr__(self) -> str:
+        return f'Tracking({self._data})'
+
+    def data(self) -> [dict]:
+        """Return tracking data."""
+        return self._data
+
+    def num_and_status(self) -> [(str, str)]:
+        """Return a list of (tracking number, status)."""
+        tracking = []
+        for package in self._data:
+            tracking.append((package['trackingNumber'], 
+                             package['latestCheckpoint']['checkpointStatusMessage']))
+        return tracking
 
 class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
-        self._orders_endpoint = 'https://api.ssactivewear.com/v2/orders/'
-        self._returns_endpoint = 'https://api.ssactivewear.com/v2/returns/'
+        self._endpoint = 'https://api.ssactivewear.com/v2/'
+        self._orders_endpoint = self._endpoint + 'orders/'
+        self._returns_endpoint = self._endpoint + 'returns/'
         self._headers = {'Content-Type': 'application/json'}
 
     def get_order(self, po_number: str) -> Order:
@@ -120,3 +163,22 @@ class SSActivewear:
         if len(skus_and_qtys) != 0:
             raise ValueError('sku or qty not in original order')
         return lines_with_invoice
+
+    def track_using_invoices(self, nums: [str]) -> Tracking:
+        """Return Tracking for the given invoices."""
+        return self._track_using('Invoice', nums)
+
+    def track_using_tracking(self, nums: [str]) -> Tracking:
+        """Return Tracking for the given tracking numbers."""
+        return self._track_using('TrackingNum', nums)
+
+    def track_using_order_nums(self, nums: [str]) -> Tracking:
+        """Return Tracking for the given order numbers."""
+        return self._track_using('OrderNum', nums)
+
+    def _track_using(self, data_type: str, list_of_numbers: [str]) -> Tracking:
+        """Return Tracking for the given data_type."""
+        url = self._endpoint + 'TrackingDataBy' + data_type + '/' + ','.join(list_of_numbers)
+        response = requests.get(url, auth=self._auth, headers=self._headers)
+        response.raise_for_status()
+        return Tracking(response.json())
