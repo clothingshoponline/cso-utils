@@ -4,9 +4,10 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 
 ## Requirements
 
-- Python < 3.9
+- Python <= 3.9.5
 - requests <= 2.25.1
-- PyGithub <= 1.54.1
+- PyGithub <= 1.55
+- pytest <= 6.2.4
 
 ## Installation
 
