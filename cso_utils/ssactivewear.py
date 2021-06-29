@@ -61,11 +61,12 @@ class Tracking:
         return self._data
 
     def num_and_status(self) -> [(str, str)]:
-        """Return a list of (tracking number, status)."""
+        """Return a list of (tracking number, latest checkpoint status)."""
         tracking = []
         for package in self._data:
-            tracking.append((package['trackingNumber'], 
-                             package['latestCheckpoint']['checkpointStatusMessage']))
+            latest = package['latestCheckpoint']
+            status = f"{latest['checkpointDate']} at {latest['checkpointTime']} - {latest['checkpointStatusMessage']}"
+            tracking.append((package['trackingNumber'], status))
         return tracking
 
 class SSActivewear:

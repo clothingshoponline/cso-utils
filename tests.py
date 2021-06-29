@@ -62,13 +62,20 @@ class TestTracking:
 
     def test_num_and_status(self):
         tracking1 = ssactivewear.Tracking([{'trackingNumber': '1', 
-                                            'latestCheckpoint': {'checkpointStatusMessage': 'A'}}])
+                                            'latestCheckpoint': {'checkpointDate': '6/28/2021', 
+                                                                 'checkpointTime': '7:00 AM', 
+                                                                 'checkpointStatusMessage': 'A'}}])
         tracking2 = ssactivewear.Tracking([{'trackingNumber': '2', 
-                                            'latestCheckpoint': {'checkpointStatusMessage': 'B'}}, 
+                                            'latestCheckpoint': {'checkpointDate': '6/29/2021', 
+                                                                 'checkpointTime': '8:00 AM', 
+                                                                 'checkpointStatusMessage': 'B'}}, 
                                            {'trackingNumber': '3', 
-                                            'latestCheckpoint': {'checkpointStatusMessage': 'C'}}])
-        assert tracking1.num_and_status() == [('1', 'A')]
-        assert tracking2.num_and_status() == [('2', 'B'), ('3', 'C')]
+                                            'latestCheckpoint': {'checkpointDate': '6/30/2021', 
+                                                                 'checkpointTime': '9:00 PM', 
+                                                                 'checkpointStatusMessage': 'C'}}])
+        assert tracking1.num_and_status() == [('1', '6/28/2021 at 7:00 AM - A')]
+        assert tracking2.num_and_status() == [('2', '6/29/2021 at 8:00 AM - B'), 
+                                              ('3', '6/30/2021 at 9:00 PM - C')]
 
 class TestSSActivewear:
     def test_filter(self):
