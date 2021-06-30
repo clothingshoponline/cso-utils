@@ -34,6 +34,17 @@ from cso_utils import ssactivewear
 from cso_utils import github_api
 ```
 
+#### Create Bug Report
+
+_Creates a Github Issue with the traceback. Bad requests that cause a_ `requests.exceptions.HTTPError` _exception will include the traceback and response sent back._
+
+```
+try:
+    ... # code that raises an exception
+except:
+    github_api.create_bug_report('<token>', '<repo name>')
+```
+
 
 ### Zendesk
 
