@@ -53,7 +53,7 @@ print(order)
 data = order.data()
 ```
 
-##### Get lines
+##### Get Lines
 
 ```
 lines = order.lines()
@@ -185,6 +185,117 @@ except:
 
 ```
 from cso_utils import zendesk
+```
+
+#### Connect to Zendesk API
+
+```
+zen_api = zendesk.Zendesk('<subdomain>', '<email>', '<token>')
+```
+
+#### Get Ticket
+
+_Returns a_ `Ticket` _object._
+
+```
+ticket = zen_api.get_ticket('<id number>')
+```
+
+#### Ticket
+
+##### Print
+
+```
+print(ticket)
+```
+
+##### Get Ticket Data
+
+```
+data = ticket.data()
+```
+
+##### Get ID Number
+
+```
+id_number = ticket.id_num()
+```
+
+##### Get Subject
+
+```
+subject = ticket.subject()
+```
+
+##### Get Custom Fields
+
+```
+custom_fields = ticket.custom_fields()
+```
+
+##### Check That Ticket Has Given Tag
+
+```
+ticket.has_tag('<tag>')
+```
+
+##### Check That Ticket Has Given Text
+
+_Only checks subject and first comment._
+
+```
+ticket.has_text('<text>')
+```
+
+##### Check That Ticket Has Given Status
+
+```
+ticket.has_status('<status>')
+```
+
+##### Check That Ticket is in Given Group
+
+```
+ticket.in_group('<group id>')
+```
+
+##### Check That Ticket Sent From Given Email
+
+```
+ticket.sent_from('<email>')
+```
+
+#### Create Ticket and Send Message to Customer
+
+```
+customer_name = 'first last'
+customer_email = 'someone@example.com'
+subject = 'Hello'
+message = 'Welcome!'
+group_id = '123'
+tags = ['tag1', 'tag2']
+
+# optional
+assignee = 'assignee@company.com'
+support_email = 'support@company.com'
+
+ticket_id = zen_api.create_ticket_and_send_to_customer(customer_name,
+                                                       customer_email, 
+                                                       subject, 
+                                                       message,
+                                                       group_id,
+                                                       tags,
+                                                       assignee,
+                                                       support_email)
+```
+
+#### Get Tickets Created Between Today and Given Date
+
+_Returns a list of_ `Ticket` _objects._
+
+```
+# December 1, 2020
+tickets = zen_api.tickets_created_between_today_and(12, 1, 2020)
 ```
 
 
