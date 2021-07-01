@@ -25,6 +25,139 @@ pip install git+https://github.com/clothingshoponline/cso-utils.git@v3.5.1
 from cso_utils import ssactivewear
 ```
 
+#### Connect to S&S Activewear API
+
+```
+ss_api = ssactivewear.SSActivewear('<account>', '<password>')
+```
+
+#### Get Order
+
+_Returns an_ `Order` _object._
+
+```
+order = ss_api.get_order('<po number>')
+```
+
+#### Order
+
+##### Print
+
+```
+print(order)
+```
+
+##### Get Order Data
+
+```
+data = order.data()
+```
+
+##### Get lines
+
+```
+lines = order.lines()
+```
+
+##### Get Tracking Numbers
+
+```
+tracking = order.tracking_nums()
+```
+
+##### Get Order Numbers
+
+```
+order_nums = order.order_nums()
+```
+
+##### Get Invoices
+
+```
+invoices = order.invoices()
+```
+
+##### Get GUIDs
+
+```
+guids = order.guids()
+```
+
+#### Full Return
+
+```
+po_number = '123'
+reason_code = 1 # reason codes defined at https://api.ssactivewear.com/V2/Returns_Post.aspx
+reason_comment = 'do not want'
+test = True
+return_warehouses = ['NV', 'TX'] # optional
+
+ra, address = ss_api.full_return(po_number, 
+                                 reason_code, 
+                                 reason_comment, 
+                                 test, 
+                                 return_warehouses)
+```
+
+#### Partial Return
+
+_Variables for a full return apply._
+
+```
+skus_and_qtys = {'B1': 1, 'B2': 2}
+
+ra, address = ss_api.partial_return(po_number, 
+                                    skus_and_qtys, 
+                                    reason_code, 
+                                    reason_comment, 
+                                    test, 
+                                    return_warehouses)
+```
+
+#### Track Using Tracking Numbers
+
+_Returns a_ `Tracking` _object._
+
+```
+tracking = ss_api.track_using_tracking(['1', '2'])
+```
+
+#### Track Using Order Numbers
+
+_Returns a_ `Tracking` _object._
+
+```
+tracking = ss_api.track_using_order_nums(['1', '2'])
+```
+
+#### Track Using Invoices
+
+_Returns a_ `Tracking` _object._
+
+```
+tracking = ss_api.track_using_invoices(['1', '2'])
+```
+
+#### Tracking
+
+##### Print
+
+```
+print(tracking)
+```
+
+##### Get Tracking Data
+
+```
+data = tracking.data()
+```
+
+##### Get Tracking Numbers and Status
+
+```
+status = tracking.num_and_status()
+```
+
 
 ### Github
 
