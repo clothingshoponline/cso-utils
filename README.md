@@ -62,3 +62,37 @@ from cso_utils import zendesk
 ```
 from cso_utils import channeladvisor
 ```
+
+#### Connect to ChannelAdvisor API
+
+```
+ca_api = channeladvisor.ChannelAdvisor('<token>')
+```
+
+#### Get Order
+
+_Returns a_ `ChannelAdvisorOrder` _object._
+
+```
+ca_order = ca_api.get_order('<site order id>')
+```
+
+#### ChannelAdvisorOrder
+
+##### Print
+
+```
+print(ca_order)
+```
+
+##### Get Order Data
+
+```
+data = ca_order.data()
+```
+
+##### Get PO Number
+
+```
+po_number = ca_order.po_number()
+```
