@@ -156,3 +156,19 @@ class TestZendesk:
         assert zen._subdomain == 'subdomain'
         assert zen._auth == ('someone@example.com/token', 'token1')
         assert zen._url == 'https://subdomain.zendesk.com/api/v2/tickets'
+
+
+from cso_utils import channeladvisor
+
+class TestChannelAdvisorOrder:
+    def test_repr(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
+        assert str(ca_order) == "ChannelAdvisorOrder({'ID': '123'})"
+
+    def test_data(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
+        assert ca_order.data() == {'ID': '123'}
+
+    def test_po_number(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
+        assert ca_order.po_number() == '123'
