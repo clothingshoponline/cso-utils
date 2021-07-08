@@ -60,10 +60,7 @@ class Ticket:
                 and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
-    def __init__(self, subdomain: str = '', email: str = '', token: str = ''):
-        self.authenticate(subdomain, email, token)
-        
-    def authenticate(self, subdomain: str, email: str, token: str) -> None:
+    def __init__(self, subdomain: str, email: str, token: str):
         self._subdomain = subdomain
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
@@ -77,7 +74,7 @@ class Zendesk:
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
                                            html_message: str, group_id: str,
-                                           tags: [str], assignee_email: str = None, 
+                                           tag: str, assignee_email: str = None, 
                                            zendesk_support_email: str = None) -> str:
         """Create a new ticket and send the message to the customer. 
         Return the ID of the new ticket. 
@@ -96,7 +93,7 @@ class Zendesk:
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
                                 json={'ticket': {'comment': {'html_body': html_message, 'public': True}, 
                                                  'group_id': int(group_id), 
-                                                 'tags': tags,
+                                                 'tags': tag,
                                                  'status': 'solved'}})
         response.raise_for_status()
 
