@@ -69,6 +69,26 @@ class Tracking:
             tracking.append((package['trackingNumber'], status))
         return tracking
 
+class ReturnRequest:
+    def __init__(self, json_data: [dict]):
+        self._data = json_data
+
+    def __repr__(self) -> str:
+        return f'ReturnRequest({self._data})'
+
+    def data(self) -> [dict]:
+        """Return the Return's data."""
+        return self._data
+
+    def ra_num(self) -> str:
+        """Return the RA number."""
+        return self._data[0]['returnInformation']['raNumber']
+
+    def address_to_send_items(self) -> dict:
+        """Return the address that the items should be sent to."""
+        return self._data[0]['returnInformation']['address']
+
+
 class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
@@ -99,30 +119,28 @@ class SSActivewear:
 
     def full_return(self, po_number: str, reason_code: int, 
                     reason_comment: str, test: bool, 
-                    return_warehouses: [str] = None) -> (str, dict):
-        """Request a full return. Return (RA number, shipping address)."""
+                    return_warehouses: [str] = None) -> ReturnRequest:
+        """Request a full return."""
         original_order = self.get_order(po_number)
-        ra, address = self._return_request(original_order.lines(), reason_code, 
-                                           reason_comment, test, return_warehouses)
-        return (ra, address)
+        ra_info = self._return_request(original_order.lines(), reason_code, 
+                                       reason_comment, test, return_warehouses)
+        return ra_info
 
     def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int, 
                        reason_comment: str, test: bool, 
-                       return_warehouses: [str] = None) -> (str, dict):
-        """Request a partial return. Return (RA number, shipping address)."""
+                       return_warehouses: [str] = None) -> ReturnRequest:
+        """Request a partial return."""
         original_order = self.get_order(po_number)
         lines_with_invoice = self._match_skus_with_invoice(original_order.lines(), 
                                                            skus_and_qtys)
-        ra, address = self._return_request(lines_with_invoice, reason_code, 
-                                           reason_comment, test, return_warehouses)
-        return (ra, address)
+        ra_info = self._return_request(lines_with_invoice, reason_code, 
+                                       reason_comment, test, return_warehouses)
+        return ra_info
 
     def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}], 
                         reason_code: int, reason_comment: str, test: bool, 
-                        return_warehouses: [str] or None) -> (str, dict):
-        """Create return request and send to API. Return (RA number, 
-        shipping address).
-        """
+                        return_warehouses: [str] or None) -> ReturnRequest:
+        """Create return request and send to API."""
         lines = []
         for line in lines_to_return:
             lines.append({'invoiceNumber': line['invoice'], 
@@ -144,8 +162,7 @@ class SSActivewear:
                                  auth=self._auth, 
                                  json=data)
         response.raise_for_status()
-        return_info = response.json()[0]['returnInformation']
-        return (return_info['raNumber'], return_info['returnToAddress'])
+        return ReturnRequest(response.json())
 
     def _match_skus_with_invoice(self, 
                                  original_lines: [{'invoice': str, 'sku': str, 'qty_shipped': int}],

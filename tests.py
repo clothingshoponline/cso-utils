@@ -77,6 +77,24 @@ class TestTracking:
         assert tracking2.num_and_status() == [('2', '6/29/2021 at 8:00 AM - B'), 
                                               ('3', '6/30/2021 at 9:00 PM - C')]
 
+class TestReturnRequest:
+    def test_repr(self):
+        return_request = ssactivewear.ReturnRequest([{'ra': '123'}])
+        assert str(return_request) == "ReturnRequest([{'ra': '123'}])"
+
+    def test_data(self):
+        return_request = ssactivewear.ReturnRequest([{'ra': '123'}])
+        assert return_request.data() == [{'ra': '123'}]
+
+    def test_ra_num(self):
+        return_request = ssactivewear.ReturnRequest([{'returnInformation': {'raNumber': '321'}}])
+        assert return_request.ra_num() == '321'
+
+    def test_address_to_send_items(self):
+        return_request = ssactivewear.ReturnRequest([{'returnInformation': {'address': {'city': 'somewhere'}}}])
+        assert return_request.address_to_send_items() == {'city': 'somewhere'}
+
+
 class TestSSActivewear:
     def test_filter(self):
         response = [{'poNumber': '111', 'orderType': 'Order', 'orderStatus': 'Shipped'}, 
