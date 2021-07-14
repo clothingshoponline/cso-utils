@@ -86,13 +86,10 @@ class TestReturnRequest:
         return_request = ssactivewear.ReturnRequest([{'ra': '123'}])
         assert return_request.data() == [{'ra': '123'}]
 
-    def test_ra_num(self):
-        return_request = ssactivewear.ReturnRequest([{'returnInformation': {'raNumber': '321'}}])
-        assert return_request.ra_num() == '321'
-
-    def test_address_to_send_items(self):
-        return_request = ssactivewear.ReturnRequest([{'returnInformation': {'address': {'city': 'somewhere'}}}])
-        assert return_request.address_to_send_items() == {'city': 'somewhere'}
+    def test_instructions(self):
+        return_request = ssactivewear.ReturnRequest([{'returnInformation': {'raNumber': '321', 
+                                                                            'returnToAddress': {'city': 'somewhere'}}}])
+        assert return_request.instructions() == ('321', {'city': 'somewhere'})
 
 
 class TestSSActivewear:

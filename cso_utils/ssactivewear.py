@@ -80,14 +80,10 @@ class ReturnRequest:
         """Return the Return's data."""
         return self._data
 
-    def ra_num(self) -> str:
-        """Return the RA number."""
-        return self._data[0]['returnInformation']['raNumber']
-
-    def address_to_send_items(self) -> dict:
-        """Return the address that the items should be sent to."""
-        return self._data[0]['returnInformation']['address']
-
+    def instructions(self) -> (str, dict):
+        """Return the (RA number, address to send items to)."""
+        info = self._data[0]['returnInformation']
+        return (info['raNumber'], info['returnToAddress'])
 
 class SSActivewear:
     def __init__(self, account: str, password: str):
