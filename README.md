@@ -85,6 +85,7 @@ guids = order.guids()
 
 #### Full Return
 
+_Returns a_ `ReturnRequest` _object._
 ```
 po_number = '123'
 reason_code = 1 # reason codes defined at https://api.ssactivewear.com/V2/Returns_Post.aspx
@@ -92,7 +93,7 @@ reason_comment = 'do not want'
 test = True
 return_warehouses = ['NV', 'TX'] # optional
 
-ra, address = ss_api.full_return(po_number, 
+return_request = ss_api.full_return(po_number, 
                                  reason_code, 
                                  reason_comment, 
                                  test, 
@@ -101,17 +102,37 @@ ra, address = ss_api.full_return(po_number,
 
 #### Partial Return
 
-_Variables for a full return apply._
+_Variables for a full return apply. Returns a_ `ReturnRequest` _object._
 
 ```
 skus_and_qtys = {'B1': 1, 'B2': 2}
 
-ra, address = ss_api.partial_return(po_number, 
+return_request = ss_api.partial_return(po_number, 
                                     skus_and_qtys, 
                                     reason_code, 
                                     reason_comment, 
                                     test, 
                                     return_warehouses)
+```
+
+#### ReturnRequest
+
+##### Print
+
+```
+print(return_request)
+```
+
+##### Get Data
+
+```
+data = return_request.data()
+```
+
+##### Get Return Instructions
+
+```
+ra, address = return_request.instructions()
 ```
 
 #### Track Using Tracking Numbers
@@ -273,7 +294,7 @@ customer_email = 'someone@example.com'
 subject = 'Hello'
 message = 'Welcome!'
 group_id = '123'
-tags = ['tag1', 'tag2']
+tag = 'tag1'
 
 # optional
 assignee = 'assignee@company.com'
@@ -284,7 +305,7 @@ ticket_id = zen_api.create_ticket_and_send_to_customer(customer_name,
                                                        subject, 
                                                        message,
                                                        group_id,
-                                                       tags,
+                                                       tag,
                                                        assignee,
                                                        support_email)
 ```
@@ -318,7 +339,7 @@ ca_api = channeladvisor.ChannelAdvisor('<token>')
 _Returns a_ `ChannelAdvisorOrder` _object._
 
 ```
-ca_order = ca_api.get_order('<site order id>')
+ca_order = ca_api.get_order('<site order id or po number>')
 ```
 
 #### ChannelAdvisorOrder
