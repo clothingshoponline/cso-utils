@@ -79,6 +79,16 @@ class Zendesk:
         """Create a new ticket and send the message to the customer. 
         Return the ID of the new ticket. 
         """
+        ticket_id = self.create_ticket(customer_name, customer_email, subject,
+                                       html_message, assignee_email, 
+                                       zendesk_support_email)
+        ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
+        return ticket_id
+
+    def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
+                      html_message: str, assignee_email: str = None, 
+                      zendesk_support_email: str = None) -> str:
+        """Create a new ticket. Return ticket ID."""
         data = {'ticket': {'subject': subject, 
                            'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
                            'comment': {'html_body': html_message, 'public': False}}}
@@ -89,12 +99,19 @@ class Zendesk:
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()['ticket']['id'])
+        return ticket_id
 
+    def send_to_customer(self, ticket_id: str, html_message: str, 
+                         group_id: str = None, tag: str = None) -> str:
+        """Send a message to the customer by replying to the given ticket. Return the ticket ID."""
+        data = {'comment': {'html_body': html_message, 'public': True}, 
+                'status': 'solved'}
+        if group_id:
+            data['group_id'] = int(group_id)
+        if tag:
+            data['tags'] = tag
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
-                                json={'ticket': {'comment': {'html_body': html_message, 'public': True}, 
-                                                 'group_id': int(group_id), 
-                                                 'tags': tag,
-                                                 'status': 'solved'}})
+                                json={'ticket': data})
         response.raise_for_status()
 
         return ticket_id
