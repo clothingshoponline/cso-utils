@@ -115,27 +115,31 @@ class SSActivewear:
 
     def full_return(self, po_number: str, reason_code: int, 
                     reason_comment: str, test: bool, 
-                    return_warehouses: [str] = None) -> ReturnRequest:
+                    return_warehouses: [str] = None, 
+                    force_restock: bool = False) -> ReturnRequest:
         """Request a full return."""
         original_order = self.get_order(po_number)
         ra_info = self._return_request(original_order.lines(), reason_code, 
-                                       reason_comment, test, return_warehouses)
+                                       reason_comment, test, return_warehouses, 
+                                       force_restock)
         return ra_info
 
     def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int, 
                        reason_comment: str, test: bool, 
-                       return_warehouses: [str] = None) -> ReturnRequest:
+                       return_warehouses: [str] = None, 
+                       force_restock: bool = False) -> ReturnRequest:
         """Request a partial return."""
         original_order = self.get_order(po_number)
         lines_with_invoice = self._match_skus_with_invoice(original_order.lines(), 
                                                            skus_and_qtys)
         ra_info = self._return_request(lines_with_invoice, reason_code, 
-                                       reason_comment, test, return_warehouses)
+                                       reason_comment, test, return_warehouses, 
+                                       force_restock)
         return ra_info
 
     def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}], 
                         reason_code: int, reason_comment: str, test: bool, 
-                        return_warehouses: [str] or None) -> ReturnRequest:
+                        return_warehouses: [str] or None, force_restock: bool) -> ReturnRequest:
         """Create return request and send to API."""
         lines = []
         for line in lines_to_return:
@@ -151,7 +155,8 @@ class SSActivewear:
                 'showBoxes': False, 
                 'lines': lines, 
                 'OverrideRestockFee': True, 
-                'OverrideHandling': True}
+                'OverrideHandling': True, 
+                'ForceRestock': force_restock}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
         response = requests.post(self._returns_endpoint, 
