@@ -73,8 +73,8 @@ class Zendesk:
 
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
-                                           html_message: str, group_id: str,
-                                           tag: str, assignee_email: str = None, 
+                                           html_message: str, group_id: str = None,
+                                           tag: str = None, assignee_email: str = None, 
                                            zendesk_support_email: str = None) -> str:
         """Create a new ticket and send the message to the customer. 
         Return the ID of the new ticket. 

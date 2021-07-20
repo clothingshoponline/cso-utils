@@ -91,8 +91,10 @@ po_number = '123'
 reason_code = 1 # reason codes defined at https://api.ssactivewear.com/V2/Returns_Post.aspx
 reason_comment = 'do not want'
 test = True
-return_warehouses = ['NV', 'TX'] # optional
-force_restock = True # optional
+
+# optional
+return_warehouses = ['NV', 'TX'] 
+force_restock = True
 
 return_request = ss_api.full_return(po_number, 
                                     reason_code, 
@@ -296,10 +298,10 @@ customer_name = 'first last'
 customer_email = 'someone@example.com'
 subject = 'Hello'
 message = 'Welcome!'
-group_id = '123'
-tag = 'tag1'
 
 # optional
+group_id = '123'
+tag = 'tag1'
 assignee = 'assignee@company.com'
 support_email = 'support@company.com'
 
