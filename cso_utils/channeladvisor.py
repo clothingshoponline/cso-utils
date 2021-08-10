@@ -24,7 +24,7 @@ class ChannelAdvisor:
         """Return a ChannelAdvisorOrder object representing the order 
         with the given order ID or PO number.
         """
-        if len(site_order_id_or_po) <= 8:
+        if len(site_order_id_or_po) >= 8:
             endpoint = f"https://api.channeladvisor.com/v1/Orders?access_token={self._token}&$expand=Items,Fulfillments&$filter=SiteOrderID eq '{site_order_id_or_po}'"
             response = requests.get(endpoint)
             response.raise_for_status()
