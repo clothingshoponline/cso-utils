@@ -113,7 +113,7 @@ class Zendesk:
         response.raise_for_status()
         response = requests.put(self._url + '/' + ticket_id + '/tags', 
                                 auth=self._auth, 
-                                json={tags: [tag]})
+                                json={'tags': [tag]})
         response.raise_for_status()
 
         return ticket_id
