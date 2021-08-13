@@ -108,10 +108,12 @@ class Zendesk:
                 'status': 'solved'}
         if group_id:
             data['group_id'] = int(group_id)
-        if tag:
-            data['tags'] = tag
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
                                 json={'ticket': data})
+        response.raise_for_status()
+        response = requests.put(self._url + '/' + ticket_id + '/tags', 
+                                auth=self._auth, 
+                                json={tags: [tag]})
         response.raise_for_status()
 
         return ticket_id
