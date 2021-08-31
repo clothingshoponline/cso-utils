@@ -1,5 +1,5 @@
 __version__ = '4.0.4'
-__pyversion__ = '<=3.9.5'
+__pyversion__ = '<=3.9.6'
 __title__ = 'cso_utils'
 __author__ = 'Clothing Shop Online'
 __requests__ = 'requests<=2.25.1'
