@@ -1,16 +1,8 @@
 import requests
 
-class ChannelAdvisorOrder:
-    def __init__(self, json_data: [dict]):
-        self._data = json_data
+from . import stored_data
 
-    def __repr__(self) -> str:
-        return f'ChannelAdvisorOrder({self._data})'
-
-    def data(self) -> [dict]:
-        """Return order data."""
-        return self._data
-
+class ChannelAdvisorOrder(stored_data.StoredData):
     def po_number(self) -> str:
         """Return the PO Number."""
         return str(self._data['ID'])

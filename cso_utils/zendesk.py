@@ -3,18 +3,9 @@ import time
 
 import requests
 
+from . import stored_data
 
-class Ticket:
-    def __init__(self, json_data: dict):
-        self._data = json_data
-
-    def __repr__(self) -> str:
-        return f'Ticket({self._data})'
-
-    def data(self) -> dict:
-        """Return ticket data."""
-        return self._data
-
+class Ticket(stored_data.StoredData):
     def id_num(self) -> str:
         """Return the ticket's ID number."""
         return self._data['id']

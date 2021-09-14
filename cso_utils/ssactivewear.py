@@ -1,17 +1,8 @@
 import requests
 
+from . import stored_data
 
-class Order:
-    def __init__(self, json_data: [dict]):
-        self._data = json_data
-
-    def __repr__(self) -> str:
-        return f'Order({self._data})'
-
-    def data(self) -> dict:
-        """Return order data."""
-        return self._data
-
+class Order(stored_data.StoredData):
     def lines(self) -> [dict]:
         """Return a list of lines where each line 
         has invoice, sku, qty_ordered and qty_shipped.
@@ -49,17 +40,7 @@ class Order:
         return numbers
 
 
-class Tracking:
-    def __init__(self, json_data: [dict]):
-        self._data = json_data
-
-    def __repr__(self) -> str:
-        return f'Tracking({self._data})'
-
-    def data(self) -> [dict]:
-        """Return tracking data."""
-        return self._data
-
+class Tracking(stored_data.StoredData):
     def num_and_status(self) -> [(str, str)]:
         """Return a list of (tracking number, latest checkpoint status)."""
         tracking = []
@@ -69,17 +50,7 @@ class Tracking:
             tracking.append((package['trackingNumber'], status))
         return tracking
 
-class ReturnRequest:
-    def __init__(self, json_data: [dict]):
-        self._data = json_data
-
-    def __repr__(self) -> str:
-        return f'ReturnRequest({self._data})'
-
-    def data(self) -> [dict]:
-        """Return the Return's data."""
-        return self._data
-
+class ReturnRequest(stored_data.StoredData):
     def instructions(self) -> (str, dict):
         """Return the (RA number, address to send items to)."""
         info = self._data[0]['returnInformation']
