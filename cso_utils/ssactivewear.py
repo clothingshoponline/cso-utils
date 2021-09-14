@@ -56,6 +56,23 @@ class ReturnRequest(stored_data.StoredData):
         info = self._data[0]['returnInformation']
         return (info['raNumber'], info['returnToAddress'])
 
+class Product(stored_data.StoredData):
+    def sku(self) -> str:
+        """Return the sku."""
+        return self._data['sku']
+
+    def brand(self) -> str:
+        """Return the brand."""
+        return self._data['brandName']
+
+    def style(self) -> str:
+        """Return the style."""
+        return self._data['styleName']
+
+    def price(self) -> float:
+        """Return the price."""
+        return self._data['piecePrice']
+
 class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
@@ -170,3 +187,16 @@ class SSActivewear:
         response = requests.get(url, auth=self._auth, headers=self._headers)
         response.raise_for_status()
         return Tracking(response.json())
+
+    def get_products(self) -> {str: Product}:
+        """Return all products as Product objects stored in a dict 
+        with the keys being the skus.
+        """
+        response = requests.get(self._endpoint + 'products/', 
+                                auth=self._auth, 
+                                headers=self._headers)
+        response.raise_for_status()
+        products = dict()
+        for product in response.json():
+            products[product['sku']] = Product(product)
+        return products

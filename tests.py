@@ -91,6 +91,23 @@ class TestReturnRequest:
                                                                             'returnToAddress': {'city': 'somewhere'}}}])
         assert return_request.instructions() == ('321', {'city': 'somewhere'})
 
+class TestProduct:
+    def test_sku(self):
+        product = ssactivewear.Product({'sku': 'B0'})
+        assert product.sku() == 'B0'
+
+    def test_brand(self):
+        product = ssactivewear.Product({'brandName': 'brand'})
+        assert product.brand() == 'brand'
+
+    def test_style(self):
+        product = ssactivewear.Product({'styleName': 'style'})
+        assert product.style() == 'style'
+
+    def test_price(self):
+        product = ssactivewear.Product({'piecePrice': 1.23})
+        assert product.price() == 1.23
+
 
 class TestSSActivewear:
     def test_filter(self):
