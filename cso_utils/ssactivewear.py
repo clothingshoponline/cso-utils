@@ -89,15 +89,13 @@ class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
         self._endpoint = 'https://api.ssactivewear.com/v2/'
-        self._orders_endpoint = self._endpoint + 'orders/'
-        self._returns_endpoint = self._endpoint + 'returns/'
         self._headers = {'Content-Type': 'application/json'}
 
     def get_order(self, po_number: str) -> Order:
         """Return an Order object representing the order with 
         the given PO number. Ignore returns and cancellations.
         """
-        response = requests.get(self._orders_endpoint + po_number + '?lines=true', 
+        response = requests.get(self._endpoint + 'orders/' + po_number + '?lines=true', 
                                 auth=self._auth, 
                                 headers=self._headers)
         response.raise_for_status()
@@ -159,7 +157,7 @@ class SSActivewear:
                 'ForceRestock': force_restock}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
-        response = requests.post(self._returns_endpoint, 
+        response = requests.post(self._endpoint + 'returns/', 
                                  auth=self._auth, 
                                  json=data)
         response.raise_for_status()
