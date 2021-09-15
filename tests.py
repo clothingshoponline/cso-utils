@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from cso_utils import ssactivewear
@@ -194,13 +196,51 @@ from cso_utils import channeladvisor
 
 class TestChannelAdvisorOrder:
     def test_repr(self):
-        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
-        assert str(ca_order) == "ChannelAdvisorOrder({'ID': '123'})"
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': 123})
+        assert str(ca_order) == "ChannelAdvisorOrder({'ID': 123})"
 
     def test_data(self):
-        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
-        assert ca_order.data() == {'ID': '123'}
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': 123})
+        assert ca_order.data() == {'ID': 123}
 
     def test_po_number(self):
-        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': '123'})
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ID': 123})
         assert ca_order.po_number() == '123'
+
+    def test_site_name(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'SiteName': 'amazon'})
+        assert ca_order.site_name() == 'amazon'
+
+    def test_site_order_id(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'SiteOrderID': '123'})
+        assert ca_order.site_order_id() == '123'
+
+    def test_lines(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'Items': [{'Sku': 'B0',
+                                                                  'Title': 'clothes',
+                                                                  'Quantity': 1, 
+                                                                  'UnitPrice': 1.23, 
+                                                                  'UnitEstimatedShippingCost': 0.45}, 
+                                                                 {'Sku': 'B1',
+                                                                  'Title': 'shirt',
+                                                                  'Quantity': 2, 
+                                                                  'UnitPrice': 4.56, 
+                                                                  'UnitEstimatedShippingCost': 0.78}]})
+        assert ca_order.lines() == [{'sku': 'B0', 
+                                     'title': 'clothes', 
+                                     'qty': 1, 
+                                     'price': 1.23, 
+                                     'shipping_cost': 0.45}, 
+                                     {'sku': 'B1', 
+                                     'title': 'shirt', 
+                                     'qty': 2, 
+                                     'price': 4.56, 
+                                     'shipping_cost': 0.78}]
+    
+    def test_creation_datetime(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'CreatedDateUtc': '2021-09-10T00:54:56Z'})
+        assert ca_order.creation_datetime() == datetime.datetime(2021, 9, 10, 0, 54, 56)
+
+    def test_shipping_status(self):
+        ca_order = channeladvisor.ChannelAdvisorOrder({'ShippingStatus': 'Shipped'})
+        assert ca_order.shipping_status() == 'Shipped'
