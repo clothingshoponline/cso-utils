@@ -1,10 +1,10 @@
-# cso-utils v4.1.0
+# cso-utils v4.2.0
 
 This package contains wrappers for commonly used API calls from the S&S Activewear, Github, ChannelAdvisor, and Zendesk APIs.
 
 ## Requirements
 
-- Python <= 3.9.5
+- Python <= 3.9.6
 - requests <= 2.25.1
 - PyGithub <= 1.55
 - pytest <= 6.2.4
@@ -12,7 +12,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 ## Installation
 
 ```
-pip install git+https://github.com/clothingshoponline/cso-utils.git@v4.1.0
+pip install git+https://github.com/clothingshoponline/cso-utils.git@v4.2.0
 ```
 
 ## Usage
@@ -365,4 +365,41 @@ data = ca_order.data()
 
 ```
 po_number = ca_order.po_number()
+```
+
+##### Get Site Name
+
+```
+site_name = ca_order.site_name()
+```
+
+##### Get Site Order ID
+
+```
+site_order_id = ca_order.site_order_id()
+```
+
+##### Get Lines
+
+```
+lines = ca_order.lines()
+```
+
+##### Get Creation Date and Time
+
+```
+creation_date = ca_order.creation_datetime()
+```
+
+##### Get Shipping Status
+
+```
+shipping_status = ca_order.shipping_status()
+```
+
+#### Get Orders Shipped on Given Date
+
+```
+# September 1, 2021
+ca_orders = ca_api.get_orders_shipped_on(9, 1, 2021)
 ```
