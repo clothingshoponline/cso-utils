@@ -2,6 +2,7 @@ import requests
 
 from . import stored_data
 
+
 class Order(stored_data.StoredData):
     def lines(self) -> [dict]:
         """Return a list of lines where each line 
@@ -10,9 +11,9 @@ class Order(stored_data.StoredData):
         lines = []
         for package in self._data:
             for line in package['lines']:
-                lines.append({'invoice': package['invoiceNumber'], 
-                              'sku': line['sku'], 
-                              'qty_ordered': line['qtyOrdered'], 
+                lines.append({'invoice': package['invoiceNumber'],
+                              'sku': line['sku'],
+                              'qty_ordered': line['qtyOrdered'],
                               'qty_shipped': line['qtyShipped']})
         return lines
 
@@ -50,11 +51,13 @@ class Tracking(stored_data.StoredData):
             tracking.append((package['trackingNumber'], status))
         return tracking
 
+
 class ReturnRequest(stored_data.StoredData):
     def instructions(self) -> (str, dict):
         """Return the (RA number, address to send items to)."""
         info = self._data[0]['returnInformation']
         return (info['raNumber'], info['returnToAddress'])
+
 
 class Product(stored_data.StoredData):
     def sku(self) -> str:
@@ -73,6 +76,15 @@ class Product(stored_data.StoredData):
         """Return the price."""
         return self._data['piecePrice']
 
+    def case_price(self) -> float:
+        """Return the price."""
+        return self._data['casePrice']
+
+    def sale_price(self) -> float:
+        """Return the price."""
+        return self._data['salePrice']
+
+
 class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
@@ -83,8 +95,8 @@ class SSActivewear:
         """Return an Order object representing the order with 
         the given PO number. Ignore returns and cancellations.
         """
-        response = requests.get(self._endpoint + 'orders/' + po_number + '?lines=true', 
-                                auth=self._auth, 
+        response = requests.get(self._endpoint + 'orders/' + po_number + '?lines=true',
+                                auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
         return Order(self._filter(po_number, response.json()))
@@ -93,65 +105,65 @@ class SSActivewear:
         """Filter out items with the wrong PO, returns, or cancelled orders."""
         data = []
         for package in response:
-            if (package['poNumber'] == po_number 
-                and package['orderType'] != 'Credit' 
-                and package['orderStatus'] != 'Cancelled'):
+            if (package['poNumber'] == po_number
+                and package['orderType'] != 'Credit'
+                    and package['orderStatus'] != 'Cancelled'):
                 data.append(package)
         return data
 
-    def full_return(self, po_number: str, reason_code: int, 
-                    reason_comment: str, test: bool, 
-                    return_warehouses: [str] = None, 
+    def full_return(self, po_number: str, reason_code: int,
+                    reason_comment: str, test: bool,
+                    return_warehouses: [str] = None,
                     force_restock: bool = False) -> ReturnRequest:
         """Request a full return."""
         original_order = self.get_order(po_number)
-        ra_info = self._return_request(original_order.lines(), reason_code, 
-                                       reason_comment, test, return_warehouses, 
+        ra_info = self._return_request(original_order.lines(), reason_code,
+                                       reason_comment, test, return_warehouses,
                                        force_restock)
         return ra_info
 
-    def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int, 
-                       reason_comment: str, test: bool, 
-                       return_warehouses: [str] = None, 
+    def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int,
+                       reason_comment: str, test: bool,
+                       return_warehouses: [str] = None,
                        force_restock: bool = False) -> ReturnRequest:
         """Request a partial return."""
         original_order = self.get_order(po_number)
-        lines_with_invoice = self._match_skus_with_invoice(original_order.lines(), 
+        lines_with_invoice = self._match_skus_with_invoice(original_order.lines(),
                                                            skus_and_qtys)
-        ra_info = self._return_request(lines_with_invoice, reason_code, 
-                                       reason_comment, test, return_warehouses, 
+        ra_info = self._return_request(lines_with_invoice, reason_code,
+                                       reason_comment, test, return_warehouses,
                                        force_restock)
         return ra_info
 
-    def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}], 
-                        reason_code: int, reason_comment: str, test: bool, 
+    def _return_request(self, lines_to_return: [{'invoice': str, 'sku': str, 'qty_shipped': int}],
+                        reason_code: int, reason_comment: str, test: bool,
                         return_warehouses: [str] or None, force_restock: bool) -> ReturnRequest:
         """Create return request and send to API."""
         lines = []
         for line in lines_to_return:
-            lines.append({'invoiceNumber': line['invoice'], 
-                          'identifier': line['sku'], 
-                          'qty': line['qty_shipped'], 
-                          'returnReason': reason_code, 
-                          'isReplace': False, 
+            lines.append({'invoiceNumber': line['invoice'],
+                          'identifier': line['sku'],
+                          'qty': line['qty_shipped'],
+                          'returnReason': reason_code,
+                          'isReplace': False,
                           'returnReasonComment': reason_comment})
-        data = {'emailConfirmation': '', 
-                'testOrder': test, 
-                'shippingLabelRequired': False, 
-                'showBoxes': False, 
-                'lines': lines, 
-                'OverrideRestockFee': True, 
-                'OverrideHandling': True, 
+        data = {'emailConfirmation': '',
+                'testOrder': test,
+                'shippingLabelRequired': False,
+                'showBoxes': False,
+                'lines': lines,
+                'OverrideRestockFee': True,
+                'OverrideHandling': True,
                 'ForceRestock': force_restock}
         if return_warehouses:
             data['returnToWareHouses'] = ','.join(return_warehouses)
-        response = requests.post(self._endpoint + 'returns/', 
-                                 auth=self._auth, 
+        response = requests.post(self._endpoint + 'returns/',
+                                 auth=self._auth,
                                  json=data)
         response.raise_for_status()
         return ReturnRequest(response.json())
 
-    def _match_skus_with_invoice(self, 
+    def _match_skus_with_invoice(self,
                                  original_lines: [{'invoice': str, 'sku': str, 'qty_shipped': int}],
                                  skus_and_qtys: {str: int}) -> [dict]:
         """Match skus with invoices from original order. Return [dict] where each dict 
@@ -161,8 +173,8 @@ class SSActivewear:
         for original_line in original_lines:
             sku = original_line['sku']
             if sku in skus_and_qtys and original_line['qty_shipped'] >= skus_and_qtys[sku]:
-                lines_with_invoice.append({'invoice': original_line['invoice'], 
-                                           'sku': sku, 
+                lines_with_invoice.append({'invoice': original_line['invoice'],
+                                           'sku': sku,
                                            'qty_shipped': skus_and_qtys[sku]})
                 del skus_and_qtys[sku]
         if len(skus_and_qtys) != 0:
@@ -183,7 +195,8 @@ class SSActivewear:
 
     def _track_using(self, data_type: str, list_of_numbers: [str]) -> Tracking:
         """Return Tracking for the given data_type."""
-        url = self._endpoint + 'TrackingDataBy' + data_type + '/' + ','.join(list_of_numbers)
+        url = self._endpoint + 'TrackingDataBy' + \
+            data_type + '/' + ','.join(list_of_numbers)
         response = requests.get(url, auth=self._auth, headers=self._headers)
         response.raise_for_status()
         return Tracking(response.json())
@@ -192,8 +205,8 @@ class SSActivewear:
         """Return all products as Product objects stored in a dict 
         with the keys being the skus.
         """
-        response = requests.get(self._endpoint + 'products/', 
-                                auth=self._auth, 
+        response = requests.get(self._endpoint + 'products/',
+                                auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
         products = dict()
