@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from cso_utils import ssactivewear
+from cso_utils import ssactivewear, channeladvisor, zendesk
 
 class TestOrder:
     def test_repr(self):
@@ -98,17 +98,17 @@ class TestProduct:
         product = ssactivewear.Product({'sku': 'B0'})
         assert product.sku() == 'B0'
 
-    def test_brand(self):
+    def test_brand_name(self):
         product = ssactivewear.Product({'brandName': 'brand'})
-        assert product.brand() == 'brand'
+        assert product.brand_name() == 'brand'
 
-    def test_style(self):
+    def test_style_name(self):
         product = ssactivewear.Product({'styleName': 'style'})
-        assert product.style() == 'style'
+        assert product.style_name() == 'style'
 
-    def test_price(self):
+    def test_piece_price(self):
         product = ssactivewear.Product({'piecePrice': 1.23})
-        assert product.price() == 1.23
+        assert product.piece_price() == 1.23
 
 
 class TestSSActivewear:
@@ -156,8 +156,6 @@ class TestSSActivewear:
 
 
 
-from cso_utils import zendesk
-
 class TestTicket:
     def test_id_num(self):
         ticket = zendesk.Ticket({'id': '1'})
@@ -192,7 +190,6 @@ class TestZendesk:
         assert zen._url == 'https://subdomain.zendesk.com/api/v2/tickets'
 
 
-from cso_utils import channeladvisor
 
 class TestChannelAdvisorOrder:
     def test_repr(self):
@@ -229,13 +226,13 @@ class TestChannelAdvisorOrder:
         assert ca_order.lines() == [{'sku': 'B0', 
                                      'title': 'clothes', 
                                      'qty': 1, 
-                                     'price': 1.23, 
-                                     'shipping_cost': 0.45}, 
+                                     'unit_price': 1.23, 
+                                     'unit_estimated_shipping_cost': 0.45}, 
                                      {'sku': 'B1', 
                                      'title': 'shirt', 
                                      'qty': 2, 
-                                     'price': 4.56, 
-                                     'shipping_cost': 0.78}]
+                                     'unit_price': 4.56, 
+                                     'unit_estimated_shipping_cost': 0.78}]
     
     def test_creation_datetime(self):
         ca_order = channeladvisor.ChannelAdvisorOrder({'CreatedDateUtc': '2021-09-10T00:54:56Z'})
