@@ -24,8 +24,8 @@ class ChannelAdvisorOrder(stored_data.StoredData):
             items_ordered.append({'sku': item['Sku'], 
                                   'title': item['Title'], 
                                   'qty': item['Quantity'],
-                                  'price': item['UnitPrice'], 
-                                  'shipping_cost': item['UnitEstimatedShippingCost']})
+                                  'unit_price': item['UnitPrice'], 
+                                  'unit_estimated_shipping_cost': item['UnitEstimatedShippingCost']})
         return items_ordered
 
     def creation_datetime(self) -> datetime.datetime:
