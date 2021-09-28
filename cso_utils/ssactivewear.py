@@ -64,24 +64,24 @@ class Product(stored_data.StoredData):
         """Return the sku."""
         return self._data['sku']
 
-    def brand(self) -> str:
-        """Return the brand."""
+    def brand_name(self) -> str:
+        """Return the brand name."""
         return self._data['brandName']
 
-    def style(self) -> str:
-        """Return the style."""
+    def style_name(self) -> str:
+        """Return the style name."""
         return self._data['styleName']
 
-    def price(self) -> float:
-        """Return the price."""
+    def piece_price(self) -> float:
+        """Return the piece price."""
         return self._data['piecePrice']
 
     def case_price(self) -> float:
-        """Return the price."""
+        """Return the case price."""
         return self._data['casePrice']
 
     def sale_price(self) -> float:
-        """Return the price."""
+        """Return the sale price."""
         return self._data['salePrice']
 
 
@@ -107,7 +107,7 @@ class SSActivewear:
         for package in response:
             if (package['poNumber'] == po_number
                 and package['orderType'] != 'Credit'
-                    and package['orderStatus'] != 'Cancelled'):
+                and package['orderStatus'] != 'Cancelled'):
                 data.append(package)
         return data
 
@@ -196,7 +196,7 @@ class SSActivewear:
     def _track_using(self, data_type: str, list_of_numbers: [str]) -> Tracking:
         """Return Tracking for the given data_type."""
         url = self._endpoint + 'TrackingDataBy' + \
-            data_type + '/' + ','.join(list_of_numbers)
+              data_type + '/' + ','.join(list_of_numbers)
         response = requests.get(url, auth=self._auth, headers=self._headers)
         response.raise_for_status()
         return Tracking(response.json())
