@@ -184,6 +184,64 @@ data = tracking.data()
 status = tracking.num_and_status()
 ```
 
+#### Get Products
+
+_Returns a dictionary where the keys are skus and the values are_ 'Product' _objects._
+
+```
+products = ss_api.get_products()
+```
+
+#### Product
+
+##### Print
+
+```
+print(product)
+```
+
+##### Get Product Data
+
+```
+data = product.data()
+```
+
+##### Get Sku
+
+```
+sku = product.sku()
+```
+
+##### Get Brand Name
+
+```
+brand_name = product.brand_name()
+```
+
+##### Get Style Name
+
+```
+style_name = product.style_name()
+```
+
+##### Get Piece Price
+
+```
+piece_price = product.piece_price()
+```
+
+##### Get Case Price
+
+```
+case_price = product.case_price()
+```
+
+##### Get Sale Price
+
+```
+sale_price = product.sale_price()
+```
+
 
 ### Github
 
@@ -293,11 +351,13 @@ ticket.sent_from('<email>')
 
 #### Create Ticket and Send Message to Customer
 
+_Option 1:_
+
 ```
 customer_name = 'first last'
 customer_email = 'someone@example.com'
 subject = 'Hello'
-message = 'Welcome!'
+message = 'Welcome!'  # Use html for formatting
 
 # optional
 group_id = '123'
@@ -313,6 +373,22 @@ ticket_id = zen_api.create_ticket_and_send_to_customer(customer_name,
                                                        tag,
                                                        assignee,
                                                        support_email)
+```
+
+_Option 2:_
+
+```
+ticket_id = zen_api.create_ticket(customer_name,
+                                  customer_email,
+                                  subject,
+                                  message,
+                                  assignee,
+                                  support_email)
+
+ticket_id = zen_api.send_to_customer(ticket_id, 
+                                     message,
+                                     group_id,
+                                     tag)
 ```
 
 #### Get Tickets Created Between Today and Given Date
@@ -398,6 +474,8 @@ shipping_status = ca_order.shipping_status()
 ```
 
 #### Get Orders Shipped on Given Date
+
+_Returns a list of_ `ChannelAdvisorOrder` _objects._
 
 ```
 # September 1, 2021
