@@ -17,7 +17,7 @@ class ChannelAdvisorOrder(stored_data.StoredData):
         """Return the site order ID."""
         return self._data['SiteOrderID']
 
-    def lines(self) -> [{'sku': str, 'title': str, 'qty': int, 'price': float, 'shipping_cost': float}]:
+    def lines(self) -> [{'sku': str, 'title': str, 'qty': int, 'unit_price': float, 'unit_estimated_shipping_cost': float}]:
         """Return the items within the order as a list of dict."""
         items_ordered = []
         for item in self._data['Items']:
