@@ -238,7 +238,7 @@ class TestChannelAdvisorOrder:
         ca_order1 = channeladvisor.ChannelAdvisorOrder({'CreatedDateUtc': '2021-09-10T00:54:56Z'})
         ca_order2 = channeladvisor.ChannelAdvisorOrder({'CreatedDateUtc': '2021-09-27T21:49:54.32Z'})
         assert ca_order1.creation_datetime() == datetime.datetime(2021, 9, 10, 0, 54, 56)
-        assert ca_order2.creation_datetime() == datetime.datetime(2021, 9, 27, 21, 49, 54, 320000)
+        assert ca_order2.creation_datetime() == datetime.datetime(2021, 9, 27, 21, 49, 54)
 
     def test_shipping_status(self):
         ca_order = channeladvisor.ChannelAdvisorOrder({'ShippingStatus': 'Shipped'})
