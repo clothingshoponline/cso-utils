@@ -30,7 +30,10 @@ class ChannelAdvisorOrder(stored_data.StoredData):
 
     def creation_datetime(self) -> datetime.datetime:
         """Return the date and time the order was created."""
-        return datetime.datetime.strptime(self._data['CreatedDateUtc'], '%Y-%m-%dT%H:%M:%SZ')
+        try:
+            return datetime.datetime.strptime(self._data['CreatedDateUtc'], '%Y-%m-%dT%H:%M:%SZ')
+        except ValueError:
+            return datetime.datetime.strptime(self._data['CreatedDateUtc'], '%Y-%m-%dT%H:%M:%S.%fZ')
 
     def shipping_status(self) -> str:
         """Return the shipping status."""
