@@ -186,7 +186,7 @@ status = tracking.num_and_status()
 
 #### Get Products
 
-_Returns a dictionary where the keys are skus and the values are_ 'Product' _objects._
+_Returns a dictionary where the keys are skus and the values are_ `Product` _objects._
 
 ```
 products = ss_api.get_products()
