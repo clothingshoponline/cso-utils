@@ -201,6 +201,14 @@ class SSActivewear:
         response.raise_for_status()
         return Tracking(response.json())
 
+    def get_product(self, sku: str) -> Product:
+        """Return Product for the given sku."""
+        response = requests.get(self._endpoint + 'products/' + sku,
+                                auth=self._auth,
+                                headers=self._headers)
+        response.raise_for_status()
+        return Product(response.json())
+        
     def get_products(self) -> {str: Product}:
         """Return all products as Product objects stored in a dict 
         with the keys being the skus.
