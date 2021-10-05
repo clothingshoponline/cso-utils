@@ -85,6 +85,20 @@ class Product(stored_data.StoredData):
         return self._data['salePrice']
 
 
+class Style(stored_data.StoredData):
+    def title(self) -> str:
+        """Return the title."""
+        return self._data[0]['title']
+
+    def description(self) -> str:
+        """Return the description."""
+        return self._data[0]['description'].replace('\r\n', '\n')
+
+    def base_category(self) -> str:
+        """Return the base category."""
+        return self._data[0]['baseCategory']
+
+
 class SSActivewear:
     def __init__(self, account: str, password: str):
         self._auth = (account, password)
