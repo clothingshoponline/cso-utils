@@ -1,3 +1,5 @@
+import datetime
+
 import requests
 
 from . import stored_data
@@ -206,6 +208,13 @@ class SSActivewear:
     def track_using_order_nums(self, nums: [str]) -> Tracking:
         """Return Tracking for the given order numbers."""
         return self._track_using('OrderNum', nums)
+
+    def track_using_actual_delivery_dates(self, dates: [datetime.datetime]) -> Tracking:
+        """Return Tracking for orders delivered on the given dates."""
+        formatted_dates = []
+        for date in dates:
+            formatted_dates.append(f"{date.year}-{date.month}-{date.day}")
+        return self._track_using('ActualDeliveryDate', formatted_dates)
 
     def _track_using(self, data_type: str, list_of_numbers: [str]) -> Tracking:
         """Return Tracking for the given data_type."""
