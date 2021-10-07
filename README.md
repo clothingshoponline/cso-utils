@@ -481,3 +481,43 @@ _Returns a list of_ `ChannelAdvisorOrder` _objects._
 # September 1, 2021
 ca_orders = ca_api.get_orders_shipped_on(9, 1, 2021)
 ```
+
+### CSO Database
+
+#### Import
+
+```
+from cso_utils import csodb_connector
+```
+
+#### Start Database Connection
+##### If using Linux OR using Windows on default port 40000
+This will work in most cases
+```
+cursor = db_connector.connection()
+```
+##### If using Windows and you need to specify a port other than 40000
+Defaults to port 40000 if run on Windows. No port required for Linux.
+Alternative port can be specified by using the "windows_port" argument (int)
+```
+cursor = db_connector.connection(windows_port=3306)
+```
+
+#### Execute Query
+```
+cursor.execute(
+    f"""
+    SELECT invoiceNumber,
+        customerNumber,
+        orderDate,
+        invoiceDate
+    FROM AllShipments
+    WHERE invoiceDate > '2021-09-20'
+    """
+)
+```
+
+#### Get Query Results
+```
+cursor.fetchall()
+```
