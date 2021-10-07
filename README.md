@@ -500,7 +500,7 @@ cursor = csodb.connection()
 Defaults to port 40000 if run on Windows. No port required for Linux.
 Alternative port can be specified by using the "windows_port" argument (int)
 ```
-cursor = csodb.connection()(windows_port=3306)
+cursor = csodb.connection(windows_port=3306)
 ```
 
 #### Execute Query
