@@ -90,15 +90,15 @@ class Product(stored_data.StoredData):
 class Style(stored_data.StoredData):
     def title(self) -> str:
         """Return the title."""
-        return self._data[0]['title']
+        return self._data['title']
 
     def description(self) -> str:
         """Return the description."""
-        return self._data[0]['description'].replace('\r\n', '\n')
+        return self._data['description'].replace('\r\n', '\n')
 
     def base_category(self) -> str:
         """Return the base category."""
-        return self._data[0]['baseCategory']
+        return self._data['baseCategory']
 
 
 class SSActivewear:
@@ -244,3 +244,24 @@ class SSActivewear:
         for product in response.json():
             products[product['sku']] = Product(product)
         return products
+
+    def get_style(self, style_id: str) -> Style:
+        """Return Style for the given style ID."""
+        response = requests.get(self._endpoint + 'styles/' + style_id,
+                                auth=self._auth,
+                                headers=self._headers)
+        response.raise_for_status()
+        return Style(response.json()[0])
+
+    def get_styles(self) -> {str: Style}:
+        """Return all styles as Style objects stored in a dict 
+        with the keys being style IDs.
+        """
+        response = requests.get(self._endpoint + 'styles/',
+                                auth=self._auth,
+                                headers=self._headers)
+        response.raise_for_status()
+        styles = dict()
+        for style in response.json():
+            styles[style['styleID']] = Style(style)
+        return styles

@@ -5,9 +5,10 @@ import github
 
 
 
-def create_bug_report(token: str, repo_name: str) -> None:
+def create_bug_report(token: str, repo_name: str, given_info: str = '') -> None:
     """Use Github Issues to create a bug report about 
-    the current raised exception.
+    the current raised exception. given_info can be anything 
+    extra needed to help debug later.
     """
     error = traceback.format_exc().split('\n')
 
@@ -28,8 +29,14 @@ def create_bug_report(token: str, repo_name: str) -> None:
         pass
 
     if extra_info:
-        error.append('Additional Info:')
+        error.append('Info from Response:')
         error.append(extra_info)
+        error.append('\n')
+
+    if given_info:
+        error.append('Additional Info:')
+        error.append(given_info)
+
     body = '\n'.join(error)
 
     g = github.Github(token)
