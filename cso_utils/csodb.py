@@ -3,33 +3,40 @@ import platform
 import os
 
 
-def connection(windows_port=40000):
+def connection(username, password, db_name, port_or_socket):
     '''
-    This function creates a connection to the Google Cloud SQL "main" database.
-    It uses the platform library to determine if the connection is for Windows or Linux
+    This can be used to connect to a database, regardless of the clients operating system.
+    This has been tested to work with Google Cloud SQL but it should work with other databases as well.
+
+    Parameters:
+    username -- Database username
+    password -- Database password
+    db_name -- Database name
+    port_or_socket -- Use port if running on Windows, use socket if running on Linux
     '''
-    if platform.system() == "Windows":
+    operating_system = platform.system()
+    if operating_system == "Windows":
         connection = pymysql.connect(
             host='127.0.0.1',
-            port=windows_port,  # make sure this port number matches the port number in the command used to start the proxy
-            user=os.getenv("GCP_SQL_USER"),
-            passwd=os.getenv("GCP_SQL_PASS"),
-            db=os.getenv("GCP_SQL_DBNAME"),
+            port=port_or_socket,
+            user=username,
+            passwd=password,
+            db=db_name,
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
         return connection.cursor()
-    elif platform.system() == "Linux":
+    elif operating_system == "Linux":
         connection = pymysql.connect(
-            unix_socket=os.getenv("GCP_SQL_CONNECTION_NAME"),
-            user=os.getenv("GCP_SQL_USER"),
-            passwd=os.getenv("GCP_SQL_PASS"),
-            db=os.getenv("GCP_SQL_DBNAME"),
+            unix_socket=port_or_socket,
+            user=username,
+            passwd=password,
+            db=db_name,
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
         return connection.cursor()
     else:
-        return {"Error": "Cound not determine platform type."}
+        return {"Error": "Cound not determine the operating system type."}
