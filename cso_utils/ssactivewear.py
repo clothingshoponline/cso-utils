@@ -6,6 +6,10 @@ from . import stored_data
 
 
 class Order(stored_data.StoredData):
+    def po_number(self) -> str:
+        """Return the PO number."""
+        return self._data[0]['poNumber']
+
     def lines(self) -> [dict]:
         """Return a list of lines where each line 
         has invoice, sku, qty_ordered and qty_shipped.
@@ -16,7 +20,7 @@ class Order(stored_data.StoredData):
                 lines.append({'invoice': package['invoiceNumber'],
                               'sku': line['sku'],
                               'qty_ordered': line['qtyOrdered'],
-                              'qty_shipped': line['qtyShipped']})
+                              'qty_shipped': line.get('qtyShipped', 0)})
         return lines
 
     def tracking_nums(self) -> [str]:
@@ -91,10 +95,6 @@ class Style(stored_data.StoredData):
     def title(self) -> str:
         """Return the title."""
         return self._data['title']
-
-    def description(self) -> str:
-        """Return the description."""
-        return self._data['description'].replace('\r\n', '\n')
 
     def base_category(self) -> str:
         """Return the base category."""
@@ -250,7 +250,7 @@ class SSActivewear:
                                 auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
-        return Product(response.json())
+        return Product(response.json()[0])
         
     def get_products(self) -> {str: Product}:
         """Return all products as Product objects stored in a dict 
@@ -265,15 +265,15 @@ class SSActivewear:
             products[product['sku']] = Product(product)
         return products
 
-    def get_style(self, style_id: str) -> Style:
+    def get_style(self, style_id: int) -> Style:
         """Return Style for the given style ID."""
-        response = requests.get(self._endpoint + 'styles/' + style_id,
+        response = requests.get(self._endpoint + 'styles/' + str(style_id),
                                 auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
         return Style(response.json()[0])
 
-    def get_styles(self) -> {str: Style}:
+    def get_styles(self) -> {int: Style}:
         """Return all styles as Style objects stored in a dict 
         with the keys being style IDs.
         """
