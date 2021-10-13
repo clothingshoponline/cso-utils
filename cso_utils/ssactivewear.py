@@ -108,20 +108,40 @@ class SSActivewear:
         self._headers = {'Content-Type': 'application/json'}
 
     def get_order(self, po_number: str) -> Order:
-        """Return an Order object representing the order with 
+        """Return an order object representing the order with 
         the given PO number. Ignore returns and cancellations.
         """
-        response = requests.get(self._endpoint + 'orders/' + po_number + '?lines=true',
+        return self._get_order_using(po_number)
+
+    def get_invoice(self, invoice: str) -> Order:
+        """Return an Order object representing the given invoice. 
+        Ignore returns and cancellations.
+        """ 
+        return self._get_order_using(invoice, 'invoice')
+
+    def _get_order_using(self, po_number_or_invoice: str, 
+                         id_type: 'po' or 'invoice' = 'po') -> Order:
+        """Return an Order object representing the order with 
+        the given PO number or invoice. Ignore returns and cancellations.
+        """
+        response = requests.get(self._endpoint + 'orders/' + po_number_or_invoice + '?lines=true',
                                 auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
-        return Order(self._filter(po_number, response.json()))
+        return Order(self._filter(po_number_or_invoice, response.json(), id_type))
 
-    def _filter(self, po_number: str, response: [dict]) -> [dict]:
-        """Filter out items with the wrong PO, returns, or cancelled orders."""
+    def _filter(self, po_number_or_invoice: str, response: [dict], 
+                id_type: 'po' or 'invoice' = 'po') -> [dict]:
+        """Filter out items with returns, cancelled orders, 
+        wrong PO, or wrong invoice.
+        """
         data = []
+        if id_type == 'po':
+            key = 'poNumber'
+        elif id_type == 'invoice':
+            key = 'invoiceNumber'
         for package in response:
-            if (package['poNumber'] == po_number
+            if (package[key] == po_number_or_invoice 
                 and package['orderType'] != 'Credit'
                 and package['orderStatus'] != 'Cancelled'):
                 data.append(package)
