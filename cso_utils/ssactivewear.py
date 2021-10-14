@@ -120,7 +120,7 @@ class SSActivewear:
         return self._get_order_using(invoice, 'invoice')
 
     def _get_order_using(self, po_number_or_invoice: str, 
-                         id_type: 'po' or 'invoice' = 'po') -> Order:
+                         num_type: 'po' or 'invoice' = 'po') -> Order:
         """Return an Order object representing the order with 
         the given PO number or invoice. Ignore returns and cancellations.
         """
@@ -128,17 +128,17 @@ class SSActivewear:
                                 auth=self._auth,
                                 headers=self._headers)
         response.raise_for_status()
-        return Order(self._filter(po_number_or_invoice, response.json(), id_type))
+        return Order(self._filter(po_number_or_invoice, response.json(), num_type))
 
     def _filter(self, po_number_or_invoice: str, response: [dict], 
-                id_type: 'po' or 'invoice' = 'po') -> [dict]:
+                num_type: 'po' or 'invoice' = 'po') -> [dict]:
         """Filter out items with returns, cancelled orders, 
         wrong PO, or wrong invoice.
         """
         data = []
-        if id_type == 'po':
+        if num_type == 'po':
             key = 'poNumber'
-        elif id_type == 'invoice':
+        elif num_type == 'invoice':
             key = 'invoiceNumber'
         for package in response:
             if (package[key] == po_number_or_invoice 
@@ -147,23 +147,57 @@ class SSActivewear:
                 data.append(package)
         return data
 
-    def full_return(self, po_number: str, reason_code: int,
-                    reason_comment: str, test: bool,
-                    return_warehouses: [str] = None,
+    def full_return(self, po_number: str, reason_code: int, 
+                    reason_comment: str, test: bool, 
+                    return_warehouses: [str] = None, 
                     force_restock: bool = False) -> ReturnRequest:
         """Request a full return."""
-        original_order = self.get_order(po_number)
+        return self._full_return_using(po_number, 
+                                       'po', 
+                                       reason_code, 
+                                       reason_comment, 
+                                       test, 
+                                       return_warehouses, 
+                                       force_restock)
+
+    def invoice_return(self, invoice: str, reason_code: int, 
+                       reason_comment: str, test: bool, 
+                       return_warehouses: [str] = None, 
+                       force_restock: bool = False) -> ReturnRequest:
+        """Request a full return for an invoice."""
+        return self._full_return_using(invoice, 
+                                       'invoice', 
+                                       reason_code, 
+                                       reason_comment, 
+                                       test, 
+                                       return_warehouses, 
+                                       force_restock)
+
+    def _full_return_using(self, po_number_or_invoice: str, 
+                           num_type: 'po' or 'invoice', 
+                           reason_code: int,
+                           reason_comment: str, 
+                           test: bool,
+                           return_warehouses: [str] = None,
+                           force_restock: bool = False) -> ReturnRequest:
+        """Request a full return for an entire order (if the PO is given), 
+        or for a specific invoice (if invoice is given).
+        """
+        original_order = self._get_order_using(po_number_or_invoice, num_type)
         ra_info = self._return_request(original_order.lines(), reason_code,
                                        reason_comment, test, return_warehouses,
                                        force_restock)
         return ra_info
 
-    def partial_return(self, po_number: str, skus_and_qtys: {str: int}, reason_code: int,
-                       reason_comment: str, test: bool,
+    def partial_return(self, po_number: str, 
+                       skus_and_qtys: {str: int}, 
+                       reason_code: int,
+                       reason_comment: str, 
+                       test: bool,
                        return_warehouses: [str] = None,
                        force_restock: bool = False) -> ReturnRequest:
         """Request a partial return."""
-        original_order = self.get_order(po_number)
+        original_order = self._get_order_using(po_number)
         lines_with_invoice = self._match_skus_with_invoice(original_order.lines(),
                                                            skus_and_qtys)
         ra_info = self._return_request(lines_with_invoice, reason_code,
