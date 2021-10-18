@@ -1,4 +1,4 @@
-# cso-utils v5.0.2
+# cso-utils v5.1.0
 
 This package contains wrappers for commonly used API calls from the S&S Activewear, Github, ChannelAdvisor, and Zendesk APIs.
 
@@ -12,7 +12,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 ## Installation
 
 ```
-pip install git+https://github.com/clothingshoponline/cso-utils.git@v5.0.2
+pip install git+https://github.com/clothingshoponline/cso-utils.git@v5.1.0
 ```
 
 ## Usage
@@ -53,6 +53,12 @@ print(order)
 data = order.data()
 ```
 
+##### Get PO Number
+
+```
+po_number = order.po_number()
+```
+
 ##### Get Lines
 
 ```
@@ -83,6 +89,14 @@ invoices = order.invoices()
 guids = order.guids()
 ```
 
+#### Get Invoice
+
+_Returns an_ `Order` _object._
+
+```
+invoice = ss_api.get_invoice('<invoice>')
+```
+
 #### Full Return
 
 _Returns a_ `ReturnRequest` _object._
@@ -102,6 +116,20 @@ return_request = ss_api.full_return(po_number,
                                     test, 
                                     return_warehouses, 
                                     force_restock)
+```
+#### Invoice Return
+
+_Variables for a full return apply. Returns a_ `ReturnRequest` _object._
+
+```
+invoice = '123'
+
+return_request = ss_api.invoice_return(invoice, 
+                                       reason_code, 
+                                       reason_comment, 
+                                       test, 
+                                       return_warehouses, 
+                                       force_restock)
 ```
 
 #### Partial Return
@@ -164,6 +192,21 @@ _Returns a_ `Tracking` _object._
 tracking = ss_api.track_using_invoices(['1', '2'])
 ```
 
+#### Track Using Actual Delivery Dates
+
+_Returns a_ `Tracking` _object._
+
+```
+import datetime
+
+# May 3, 2021
+date1 = datetime.datetime(2021, 5, 3)
+# October 12, 2021
+date2 = datetime.datetime(2021, 10, 12) 
+
+tracking = ss_api.track_using_actual_delivery_dates([date1, date2])
+```
+
 #### Tracking
 
 ##### Print
@@ -184,12 +227,30 @@ data = tracking.data()
 status = tracking.num_and_status()
 ```
 
+#### Get Product
+
+_Returns a_ `Product` _object._
+
+```
+product = ss_api.get_product('<sku>')
+```
+
 #### Get Products
 
 _Returns a dictionary where the keys are skus and the values are_ `Product` _objects._
 
 ```
 products = ss_api.get_products()
+```
+
+#### Get Products with a Specified Style ID
+
+_Returns a list of_ `Product` _objects._
+
+```
+style_id = 1
+
+products = ss_api.get_products_with_style_id(style_id)
 ```
 
 #### Product
@@ -240,6 +301,38 @@ case_price = product.case_price()
 
 ```
 sale_price = product.sale_price()
+```
+
+#### Get Style
+
+_Returns a_ `Style` _object._
+
+```
+style_id = 1
+
+style = ss_api.get_style(style_id)
+```
+
+#### Get Styles
+
+_Returns a dictionary where the keys are style IDs and the values are_ `Style` _objects._
+
+```
+styles = ss_api.get_styles()
+```
+
+#### Style
+
+##### Get Title
+
+```
+title = style.title()
+```
+
+##### Get Base Category
+
+```
+base_category = style.base_category()
 ```
 
 
