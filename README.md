@@ -487,25 +487,21 @@ ca_orders = ca_api.get_orders_shipped_on(9, 1, 2021)
 #### Import
 
 ```
-from cso_utils import csodb
+from cso_utils import database
 ```
 
 #### Start Database Connection
-##### If using Linux OR using Windows on default port 40000
-This will work in most cases
+- username (str): Database Username
+- password (str): Database Password
+- db_name (str): Database Name
+- port_or_socket (str): Port number if running on Windows ("40000" usually works) or Socket name if running on Linux
 ```
-cursor = csodb.connection()
-```
-##### If using Windows and you need to specify a port other than 40000
-Defaults to port 40000 if run on Windows. No port required for Linux.
-Alternative port can be specified by using the "windows_port" argument (int)
-```
-cursor = csodb.connection(windows_port=3306)
+connection = database.Database(username, password, db_name, port_or_socket)
 ```
 
-#### Execute Query
+#### Execute Query and Get Query Results
 ```
-cursor.execute(
+connection.cursor.execute(
     f"""
     SELECT invoiceNumber,
         customerNumber,
@@ -515,9 +511,15 @@ cursor.execute(
     WHERE invoiceDate > '2021-09-20'
     """
 )
+
+cursor.fetchall()
 ```
 
-#### Get Query Results
+#### Get List of Database Table Names
 ```
-cursor.fetchall()
+connection.get_table_names()
+```
+#### Get Database Table Column Schema
+```
+connection.get_table_schema()
 ```
