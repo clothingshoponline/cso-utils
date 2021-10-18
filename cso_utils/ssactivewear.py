@@ -299,6 +299,14 @@ class SSActivewear:
             products[product['sku']] = Product(product)
         return products
 
+    def get_products_with_style_id(self, style_id: int) -> [Product]:
+        """Return all products with the given style ID."""
+        response = requests.get(self._endpoint + 'products/?styleid=' + str(style_id), 
+                                auth=self._auth,
+                                headers=self._headers)
+        response.raise_for_status()
+        return [Product(product) for product in response.json()]
+
     def get_style(self, style_id: int) -> Style:
         """Return Style for the given style ID."""
         response = requests.get(self._endpoint + 'styles/' + str(style_id),
