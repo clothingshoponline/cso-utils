@@ -512,7 +512,7 @@ connection.cursor.execute(
     """
 )
 
-cursor.fetchall()
+connection.cursor.fetchall()
 ```
 
 #### Get List of Database Table Names
