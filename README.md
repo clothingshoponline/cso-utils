@@ -8,6 +8,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 - requests <= 2.25.1
 - PyGithub <= 1.55
 - pytest <= 6.2.4
+- PyMySQL <= 1.0.2
 
 ## Installation
 
