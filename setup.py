@@ -15,5 +15,7 @@ setup(name=package['__title__'],
       packages=[package['__title__']],
       python_requires=package['__pyversion__'],
       install_requires=[package['__requests__'], 
-                        package['__pygithub__']]
+                        package['__pygithub__'], 
+                        package['__pytest__'], 
+                        package['__pymysql__']]
 )
