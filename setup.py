@@ -17,5 +17,6 @@ setup(name=package['__title__'],
       install_requires=[package['__requests__'], 
                         package['__pygithub__'], 
                         package['__pytest__'], 
-                        package['__pymysql__']]
+                        package['__pymysql__'],
+                        package['__beautifulsoup__']]
 )
