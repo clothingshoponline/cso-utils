@@ -1,6 +1,8 @@
 import datetime
+import unicodedata
 
 import requests
+from bs4 import BeautifulSoup
 
 from . import stored_data
 
@@ -99,6 +101,19 @@ class Style(stored_data.StoredData):
     def base_category(self) -> str:
         """Return the base category."""
         return self._data['baseCategory']
+
+    def description(self) -> [str]:
+        """Return the description as a list of str 
+        where each str is a bullet point.
+        """
+        html_text = self._data['description'].split('<li>')
+        parsed_text = []
+        for html_line in html_text:
+            line = BeautifulSoup(html_line, features='html.parser').get_text()
+            line = unicodedata.normalize('NFKD', line)
+            if line.strip() != '':
+                parsed_text.append(line.strip())
+        return parsed_text
 
 
 class SSActivewear:
