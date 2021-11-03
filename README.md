@@ -517,12 +517,12 @@ _Option 2:_
 status = 'open'  # defaults as 'solved'
 public = False  # defaults as True
 
-ticket_id = ss_api.reply_to(ticket_id, 
-                            message, 
-                            group_id, 
-                            tag, 
-                            status, 
-                            public)
+ticket_id = zen_api.reply_to(ticket_id, 
+                             message, 
+                             group_id, 
+                             tag, 
+                             status, 
+                             public)
 ```
 
 #### Get Tickets Created Between Today and Given Date
