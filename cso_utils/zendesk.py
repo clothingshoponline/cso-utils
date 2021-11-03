@@ -94,9 +94,17 @@ class Zendesk:
 
     def send_to_customer(self, ticket_id: str, html_message: str, 
                          group_id: str = None, tag: str = None) -> str:
-        """Send a message to the customer by replying to the given ticket. Return the ticket ID."""
-        data = {'comment': {'html_body': html_message, 'public': True}, 
-                'status': 'solved'}
+        """Send a message to the customer by replying to the given ticket. 
+        Mark it as Solved and return the ticket ID.
+        """
+        return self.reply_to(ticket_id, html_message, group_id, tag)
+
+    def reply_to(self, ticket_id: str, html_message: str, 
+                 group_id: str = None, tag: str = None, 
+                 status: str = 'solved', public: bool = True) -> str:
+        """Reply to the given ticket and return the ticket ID."""
+        data = {'comment': {'html_body': html_message, 'public': public}, 
+                'status': status}
         if group_id:
             data['group_id'] = int(group_id)
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
