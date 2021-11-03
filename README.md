@@ -9,6 +9,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 - PyGithub <= 1.55
 - pytest <= 6.2.4
 - PyMySQL <= 1.0.2
+- beautifulsoup4 <= 4.10.0
 
 ## Installation
 
@@ -336,6 +337,12 @@ title = style.title()
 base_category = style.base_category()
 ```
 
+##### Get Description
+
+```
+description = style.description()
+```
+
 
 ### Github
 
@@ -483,6 +490,39 @@ ticket_id = zen_api.send_to_customer(ticket_id,
                                      message,
                                      group_id,
                                      tag)
+```
+
+#### Reply to Existing Ticket
+
+_Option 1:_
+
+```
+ticket_id = '123'
+message = 'Hello!'  # Use html for formatting
+
+# optional
+group_id = '123'
+tag = 'tag1'
+
+ticket_id = zen_api.send_to_customer(ticket_id, 
+                                     message,
+                                     group_id,
+                                     tag)
+```
+
+_Option 2:_
+
+```
+# optional
+status = 'open'  # defaults as 'solved'
+public = False  # defaults as True
+
+ticket_id = ss_api.reply_to(ticket_id, 
+                            message, 
+                            group_id, 
+                            tag, 
+                            status, 
+                            public)
 ```
 
 #### Get Tickets Created Between Today and Given Date
