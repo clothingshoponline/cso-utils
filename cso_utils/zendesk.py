@@ -208,11 +208,11 @@ class Zendesk:
         html_message: str,
         group_id: int = None,
         tag: str = None,
-        status: str = "solved",
+        tags: list = None,
+        status: str = "solved", # default should eventually be changed to None (if that doesn't break backwards compatability)
         public: bool = True
         ) -> str:
-        """Reply to the given ticket and return the ticket ID.
-        Mark it as Solved and return the ticket ID.
+        """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
         Uses the Zendesk POST /api/v2/tickets endpoint to add ticket comment.
         https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
@@ -224,7 +224,8 @@ class Zendesk:
             ticket_id (str): The Zendesk ticket ID you want to reply to.
             html_message (str): The comment formatted as HTML.
             group_id (str): The group this ticket is assigned to
-            tag (str): The tag that will be applied to this ticket.
+            tag (str): The tag that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
+            tags (list): The tags that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
             status (str): The state of the ticket. Allowed values are "new", "open", "pending", "hold", "solved", or "closed".Defaults to "solved".
             public: (bool) = Dictates if the html_message is public or internal. Defaults to True.
 
@@ -254,6 +255,12 @@ class Zendesk:
                 self._url + f"/{ticket_id}/tags",
                 auth=self._auth,
                 json={'tags': [tag]}
+            )
+        if tags:
+            response = requests.put(
+                self._url + f"/{ticket_id}/tags",
+                auth=self._auth,
+                json={'tags': tags}
             )
             response.raise_for_status()
         return ticket_id
