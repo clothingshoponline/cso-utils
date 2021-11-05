@@ -56,9 +56,20 @@ class Zendesk:
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
-    def get_ticket(self, id_number: str) -> Ticket:
-        """Return a Ticket with the given id."""
-        response = requests.get(self._url + '/' + id_number, auth=self._auth)
+    def get_ticket(self, id_number: str = None, ticket_id: str = None, ) -> Ticket:
+        """Use Zendesk GET /api/v2/tickets/{ticket_id} endpoint to get ticket.
+        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#show-ticket
+
+        Args:
+            id_number (str): Depreciated, renamed to "ticket_id". Zendesk ticket ID.
+            ticket_id (str): Zendesk ticket ID.
+
+        Returns:
+            [dict]: Zendesk ticket object.
+        """
+        if id_number:  # used to convert depreciated id_number attribute to ticket_id
+            ticket_id = id_number
+        response = requests.get(self._url + f"/{ticket_id}", auth=self._auth)
         response.raise_for_status()
         return Ticket(response.json()['ticket'])
 
@@ -87,7 +98,7 @@ class Zendesk:
             group_id (str): The group this ticket is assigned to.
             tag (str, optional): The tag that will be applied to this ticket. Defaults to None.
             assignee_email (str, optional): The email address of the agent to assign the ticket to. Defaults to None.
-            zendesk_support_email (str, optional): DEPRECIATED. Use "recipient" instead. The original recipient e-mail address of the ticket. Defaults to None.
+            zendesk_support_email (str, optional): Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient (str, optional): The original recipient e-mail address of the ticket. Defaults to None.
 
         Returns:
@@ -130,10 +141,10 @@ class Zendesk:
         Args:
             customer_name (str): The customer name that will be used in the ticket.requester.name property.
             customer_email (str): The customer email that will be used in the ticket.requester.email property.
-            subject (str): 	The value of the subject field for this ticket
+            subject (str): The value of the subject field for this ticket
             html_message (str): The comment formatted as HTML.
             assignee_email (str, optional): The email address of the agent to assign the ticket to. Defaults to None.
-            zendesk_support_email (str, optional): Depreciated, use "recipient" instead. The original recipient e-mail address of the ticket. Defaults to None.
+            zendesk_support_email (str, optional): Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient (str, optional): The original recipient e-mail address of the ticket. Defaults to None.
             group_id (int): The group this ticket is assigned to.
             custom_fields (list, optional): Custom fields for the ticket. Defaults to None. Format example: [{'id': 360015171152, 'value': None},{'id': 360031022192, 'value': None}]
@@ -170,7 +181,7 @@ class Zendesk:
                 "submitter_id": submitter_id,
                 "tags": tags,
                 "type": ticket_type,
-                "via": {"channel": "paperform"},
+                "via": {"channel": via_channel},
             }
         }
         response = requests.post(self._url, auth=self._auth, json=data)
@@ -182,11 +193,11 @@ class Zendesk:
         self,
         ticket_id: str,
         html_message: str,
-        group_id: str = None,
+        group_id: int = None,
         tag: str = None
         ) -> str:
-        """DEPRECIATED, use "reply_to" function.
-        Send a message to the customer by replying to the given ticket. 
+        """Depreciated, use "reply_to" method.
+        Send a message to the customer by replying to the given ticket.
         Mark it as Solved and return the ticket ID.
         Uses the Zendesk POST /api/v2/tickets endpoint.
         https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
@@ -194,7 +205,7 @@ class Zendesk:
         Args:
             ticket_id (str): The Zendesk ticket ID you want to reply to.
             html_message (str): The comment formatted as HTML.
-            group_id (str): The group this ticket is assigned to
+            group_id (int): The group this ticket is assigned to
             tag (str): The tag that will be applied to this ticket.
 
         Returns:
@@ -209,7 +220,7 @@ class Zendesk:
         group_id: int = None,
         tag: str = None,
         tags: list = None,
-        status: str = "solved", # default should eventually be changed to None (if that doesn't break backwards compatability)
+        status: str = "solved",  # default should eventually be changed to None (if that doesn't break backwards compatability)
         public: bool = True
         ) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
@@ -223,7 +234,7 @@ class Zendesk:
         Args:
             ticket_id (str): The Zendesk ticket ID you want to reply to.
             html_message (str): The comment formatted as HTML.
-            group_id (str): The group this ticket is assigned to
+            group_id (int): The group this ticket is assigned to
             tag (str): The tag that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
             tags (list): The tags that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
             status (str): The state of the ticket. Allowed values are "new", "open", "pending", "hold", "solved", or "closed".Defaults to "solved".
