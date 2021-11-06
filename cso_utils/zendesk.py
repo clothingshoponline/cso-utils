@@ -47,133 +47,80 @@ class Ticket(stored_data.StoredData):
         """Return True if the ticket was sent from the 
         given email, False otherwise.
         """
-        return (self._data['via']['channel'] == 'email' 
+        return (self._data['via']['channel'] == 'email'
                 and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
+    """Used to interact with the Zendesk Tickets API.
+    https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/
+    """
     def __init__(self, subdomain: str, email: str, token: str):
         self._subdomain = subdomain
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
     def get_ticket(self, id_number: str = None, ticket_id: str = None, ) -> Ticket:
-        """Use Zendesk GET /api/v2/tickets/{ticket_id} endpoint to get ticket.
-        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#show-ticket
-
-        Args:
-            id_number (str): Depreciated, renamed to "ticket_id". Zendesk ticket ID.
-            ticket_id (str): Zendesk ticket ID.
-
-        Returns:
-            [dict]: Zendesk ticket object.
-        """
+        """Use the Zendesk Tickets API to return a Ticket object with the given ticket ID."""
         if id_number:  # used to convert depreciated id_number attribute to ticket_id
+            print("'id_number' argument is depreciated. Use 'ticket_id' instead.")
             ticket_id = id_number
-        response = requests.get(self._url + f"/{ticket_id}", auth=self._auth)
+        response = requests.get(self._url + '/' + id_number, auth=self._auth)
         response.raise_for_status()
         return Ticket(response.json()['ticket'])
 
-    def create_ticket_and_send_to_customer(
-        self,
-        customer_name: str,
-        customer_email: str,
-        subject: str,
-        html_message: str,
-        group_id: str = None,
-        tag: str = None,
-        assignee_email: str = None,
-        zendesk_support_email: str = None,
-        recipient: str = None
-        ) -> str:
+    def create_ticket_and_send_to_customer(self, customer_name: str,
+        customer_email: str, subject: str,
+        html_message: str, group_id: str = None,
+        tag: str = None, assignee_email: str = None,
+        zendesk_support_email: str = None, recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
-        send the public "html_message" to the customer. Returns the ID of the new ticket.
-        Uses the Zendesk POST /api/v2/tickets endpoint.
-        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
-
-        Args:
-            customer_name (str): The customer name that will be used in the ticket.requester.name property.
-            customer_email (str): The customer email that will be used in the ticket.requester.email property.
-            subject (str): 	The value of the subject field for this ticket
-            html_message (str): The comment formatted as HTML.
-            group_id (str): The group this ticket is assigned to.
-            tag (str, optional): The tag that will be applied to this ticket. Defaults to None.
-            assignee_email (str, optional): The email address of the agent to assign the ticket to. Defaults to None.
-            zendesk_support_email (str, optional): Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
-            recipient (str, optional): The original recipient e-mail address of the ticket. Defaults to None.
-
-        Returns:
-            str: Zendesk ticket ID.
+        send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
         """
         if zendesk_support_email:
-            recipient = zendesk_support_email
-        ticket_id = self.create_ticket(
-            customer_name,
-            customer_email,
-            subject,
-            html_message,
-            assignee_email,
-            zendesk_support_email
-        )
+            recipient_email = zendesk_support_email
+        ticket_id = self.create_ticket(customer_name,customer_email,subject,
+            html_message,assignee_email,
+            zendesk_support_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
-    def create_ticket(
-        self,
-        customer_name: str,
-        customer_email: str,
-        subject: str,
-        html_message: str,
-        assignee_email: str = None,
+    def create_ticket(self, customer_name: str, customer_email: str, subject: str,
+        html_message: str, assignee_email: str = None,
         zendesk_support_email: str = None,
-        recipient: str = None,
+        recipient_email: str = None,
         group_id: int = None,
         custom_fields: list = None,
         organization_id: int = None,
-        priority: str = None,
+        priority: ("urgent" or "high" or "normal" or "low") = None,
         submitter_id: int = None,
         tags: list = None,
-        ticket_type: str = None,
-        via_channel: str = None
-        ) -> str:
-        """Create a new ticket using the Zendesk POST /api/v2/tickets endpoint. Returns the ticket ID.
-        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
+        ticket_type: ("problem" or "incident" or "question" or "task") = None,
+        via_channel: str = None) -> str:
+        """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
-            customer_name (str): The customer name that will be used in the ticket.requester.name property.
-            customer_email (str): The customer email that will be used in the ticket.requester.email property.
-            subject (str): The value of the subject field for this ticket
-            html_message (str): The comment formatted as HTML.
-            assignee_email (str, optional): The email address of the agent to assign the ticket to. Defaults to None.
-            zendesk_support_email (str, optional): Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
-            recipient (str, optional): The original recipient e-mail address of the ticket. Defaults to None.
-            group_id (int): The group this ticket is assigned to.
-            custom_fields (list, optional): Custom fields for the ticket. Defaults to None. Format example: [{'id': 360015171152, 'value': None},{'id': 360031022192, 'value': None}]
-            organization_id (int, optional): The organization of the requester. You can only specify the ID of an organization associated with the requester. Defaults to None.
-            priority (str, optional): The urgency with which the ticket should be addressed. Allowed values are "urgent", "high", "normal", or "low". Defaults to None.
-            submitter_id (int, optional): The user who submitted the ticket. The submitter always becomes the author of the first comment on the ticket Defaults to None.
-            tags (list, optional): The array of tags applied to this ticket. Defaults to None.
-            ticket_type (str, optional): The type of this ticket. Allowed values are "problem", "incident", "question", or "task". Defaults to None.
-            via_channel (dict, optional): The via object tells you how or why an action or event was created. Defaults to None.
-
-        Returns:
-            str: [description]
+            zendesk_support_email: Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
+            custom_fields: List of custom field ID and value pairs. Example: [{'id': custom_field_id, 'value': custome_field_value},{'id': custom_field_id, 'value': custome_field_value}]
+            tags: The array of tags applied to this ticket. Defaults to None.
+            via_channel: The via object tells you how or why an action or event was created. Defaults to None.
         """
+        priority_options = ["urgent", "high", "normal", "low"]
+        if priority and priority not in priority_options:
+            raise ValueError(f"Priority not recognized. Please use one of the following options: {priority_options}")
+
+        ticket_type_options = ["problem", "incident", "question", "task"]
+        if ticket_type and ticket_type not in ticket_type_options:
+            raise ValueError(
+                f"Ticket type not recognized. Please use one of the following options: {ticket_type_options}")
+
         if zendesk_support_email:
-            recipient = zendesk_support_email
-        data = {
-            "ticket": {
-                "subject": subject,
-                "assignee_email": assignee_email,
+            recipient_email = zendesk_support_email
+        data = {"ticket": {"subject": subject,
+        "assignee_email": assignee_email,
                 "recipient": recipient,
-                "requester": {
-                    "name": customer_name,
-                    "email": customer_email,
-                    "verified": True
-                },
-                "comment": {
-                    "html_body": html_message,
-                    "public": False
-                },
+                "requester": {"name": customer_name,"email": customer_email,"verified": True},
+                "comment": {"html_body": html_message,"public": False},
                 "group_id": group_id,
                 "custom_fields": custom_fields,
                 "organization_id": organization_id,
@@ -181,9 +128,7 @@ class Zendesk:
                 "submitter_id": submitter_id,
                 "tags": tags,
                 "type": ticket_type,
-                "via": {"channel": via_channel},
-            }
-        }
+                "via": {"channel": via_channel}}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()["ticket"]["id"])
@@ -219,30 +164,21 @@ class Zendesk:
         html_message: str,
         group_id: int = None,
         tag: str = None,
-        tags: list = None,
-        status: str = "solved",  # default should eventually be changed to None (if that doesn't break backwards compatability)
+        status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved",
         public: bool = True
         ) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
-        Uses the Zendesk POST /api/v2/tickets endpoint to add ticket comment.
-        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
-
-        Uses the Zendesk PUT /api/v2/tickets/{ticket_id}/tags endpoint to add ticket comment.
-        https://developer.zendesk.com/api-reference/ticketing/ticket-management/tags/#add-tags
-
         Args:
-            ticket_id (str): The Zendesk ticket ID you want to reply to.
-            html_message (str): The comment formatted as HTML.
-            group_id (int): The group this ticket is assigned to
-            tag (str): The tag that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
-            tags (list): The tags that will be applied to this ticket. Do not use both "tag" and "tags" arguments. Only use one.
-            status (str): The state of the ticket. Allowed values are "new", "open", "pending", "hold", "solved", or "closed".Defaults to "solved".
-            public: (bool) = Dictates if the html_message is public or internal. Defaults to True.
+            tag (str): The tag that will be applied to the ticket. Multiple tags supported if passed in as a comma seperated string.
 
         Returns:
             str: The Zendesk ticket ID that was replied to.
         """
+        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
+        if status not in status_options:
+            raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
+
         data = {
             "ticket": {
                 "group_id": group_id,
@@ -261,17 +197,12 @@ class Zendesk:
         )
         response.raise_for_status()
 
-        if tag:
+        if "," in tag:
+            tag = tag.replace(" ", "").split(",")
             response = requests.put(
                 self._url + f"/{ticket_id}/tags",
                 auth=self._auth,
-                json={'tags': [tag]}
-            )
-        if tags:
-            response = requests.put(
-                self._url + f"/{ticket_id}/tags",
-                auth=self._auth,
-                json={'tags': tags}
+                json={'tags': tag}
             )
             response.raise_for_status()
         return ticket_id
