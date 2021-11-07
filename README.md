@@ -616,7 +616,7 @@ _Returns a list of_ `ChannelAdvisorOrder` _objects._
 ca_orders = ca_api.get_orders_shipped_on(9, 1, 2021)
 ```
 
-### CSO Database
+### SQL Database Connector
 
 #### Import
 
@@ -656,4 +656,42 @@ connection.get_table_names()
 #### Get Database Table Column Schema
 ```
 connection.get_table_schema()
+```
+
+### Tracking
+Can be used to track UPS or USPS shipments. Has the option of returning standardized tracking data (at the expense of less tracking details).
+
+Note: Because the USPS API supprots batch processing, the library will automatically create batches of 10 tracking numnbers. Both UPS and USPS shipments will be tracked asyncronously for maximum performance.
+
+**The tracking responses may not be returened in the same order they were requested.**
+
+#### Import
+```
+from cso_utils import tracking
+```
+
+#### Tracking
+
+- usps_username (str): [USPS Web Tools User ID](https://www.usps.com/business/web-tools-apis/)
+- ups_username (str): UPS Account Username
+- ups_password (str): UPS Account Password
+- ups_license (str): [UPS Account API License Key](https://www.ups.com/upsdeveloperkit?loc=en_US)
+```
+tracker = tracking.Tracking(USPS_API_USERNAME, UPS_USERNAME, UPS_PASSWORD, UPS_LICENSE)
+```
+##### Track USPS Shipments 
+Note: Set "simplify=False" if you want the full USPS response.
+```
+tracking_list = [
+    "9405511898524886244010", "9405511898524886360512", "9405511898524886602995"
+    ]
+tracking_responses = tracker.track_usps(tracking_list, simplify=True)
+```
+##### Track UPS Shipments
+Note: Set "simplify=False" if you want the full UPS response.
+```
+tracking_list = [
+    "1Z2R29910236894608", "1Z2R2991YN36493852", "1Z2R2991YN36495887", "1Z2R2991YN36555893"
+    ]
+tracking_responses = tracker.track_ups(tracking_list, simplify=True)
 ```
