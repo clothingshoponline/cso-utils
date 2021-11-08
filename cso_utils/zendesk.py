@@ -68,7 +68,7 @@ class Zendesk:
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
                                            html_message: str, group_id: str = None,
-                                           tag: str = None, assignee_email: str = None,
+                                           tag: str = None, assignee_email: str = None, 
                                            zendesk_support_email: str = None, recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
         send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
@@ -81,13 +81,13 @@ class Zendesk:
             print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
-                                       html_message, assignee_email,
+                                       html_message, assignee_email, 
                                        recipient_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
     def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
-                      html_message: str, assignee_email: str = None,
+                      html_message: str, assignee_email: str = None, 
                       zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
@@ -119,19 +119,19 @@ class Zendesk:
         if zendesk_support_email:
             print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
-        data = {"ticket": {"subject": subject,
-            "requester": {"name": customer_name, "email": customer_email, "verified": True},
-            "comment": {"html_body": html_message, "public": False},
-            "assignee_email": assignee_email,
-            "recipient": recipient_email,
-            "group_id": group_id,
-            "custom_fields": custom_fields,
-            "organization_id": organization_id,
-            "priority": priority,
-            "submitter_id": submitter_id,
-            "tags": tags,
-            "type": ticket_type,
-            "via": {"channel": via_channel}}}
+        data = {'ticket': {'subject': subject, 
+                           'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
+                           'comment': {'html_body': html_message, 'public': False}, 
+                           'assignee_email': assignee_email, 
+                           'recipient': recipient_email, 
+                           'group_id': group_id, 
+                           'custom_fields': custom_fields, 
+                           'organization_id': organization_id, 
+                           'priority': priority, 
+                           'submitter_id': submitter_id, 
+                           'tags': tags, 
+                           'type': ticket_type, 
+                           'via': {'channel': via_channel}}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()['ticket']['id'])
@@ -145,8 +145,8 @@ class Zendesk:
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
     def reply_to(self, ticket_id: str, html_message: str, 
-                 group_id: str = None, tag: str = None,
-                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved",
+                 group_id: str = None, tag: str = None, 
+                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
                  public: bool = True) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
@@ -172,7 +172,7 @@ class Zendesk:
             }
         }
 
-        response = requests.put(self._url + '/' + ticket_id, auth=self._auth,json=data)
+        response = requests.put(self._url + '/' + ticket_id, auth=self._auth, json=data)
         response.raise_for_status()
 
         if tag is not None and "," in tag:
