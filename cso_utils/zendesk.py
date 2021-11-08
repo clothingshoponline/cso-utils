@@ -47,7 +47,7 @@ class Ticket(stored_data.StoredData):
         """Return True if the ticket was sent from the 
         given email, False otherwise.
         """
-        return (self._data['via']['channel'] == 'email'
+        return (self._data['via']['channel'] == 'email' 
                 and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
@@ -65,11 +65,11 @@ class Zendesk:
         response.raise_for_status()
         return Ticket(response.json()['ticket'])
 
-    def create_ticket_and_send_to_customer(self, customer_name: str,
-        customer_email: str, subject: str,
-        html_message: str, group_id: str = None,
-        tag: str = None, assignee_email: str = None,
-        zendesk_support_email: str = None, recipient_email: str = None) -> str:
+    def create_ticket_and_send_to_customer(self, customer_name: str, 
+                                           customer_email: str, subject: str, 
+                                           html_message: str, group_id: str = None,
+                                           tag: str = None, assignee_email: str = None,
+                                           zendesk_support_email: str = None, recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
         send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
         
@@ -81,23 +81,23 @@ class Zendesk:
             print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
-            html_message, assignee_email,
-            recipient_email)
+                                       html_message, assignee_email,
+                                       recipient_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
-    def create_ticket(self, customer_name: str, customer_email: str, subject: str,
-        html_message: str, assignee_email: str = None,
-        zendesk_support_email: str = None,
-        recipient_email: str = None,
-        group_id: int = None,
-        custom_fields: list = None,
-        organization_id: int = None,
-        priority: ("urgent" or "high" or "normal" or "low") = None,
-        submitter_id: int = None,
-        tags: list = None,
-        ticket_type: ("problem" or "incident" or "question" or "task") = None,
-        via_channel: str = None) -> str:
+    def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
+                      html_message: str, assignee_email: str = None,
+                      zendesk_support_email: str = None,
+                      recipient_email: str = None,
+                      group_id: int = None,
+                      custom_fields: list = None,
+                      organization_id: int = None,
+                      priority: ("urgent" or "high" or "normal" or "low") = None,
+                      submitter_id: int = None,
+                      tags: list = None,
+                      ticket_type: ("problem" or "incident" or "question" or "task") = None,
+                      via_channel: str = None) -> str:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
@@ -134,7 +134,7 @@ class Zendesk:
             "via": {"channel": via_channel}}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
-        ticket_id = str(response.json()["ticket"]["id"])
+        ticket_id = str(response.json()['ticket']['id'])
         return ticket_id
 
     def send_to_customer(self, ticket_id: str, html_message: str, 
@@ -144,10 +144,10 @@ class Zendesk:
         """
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
-    def reply_to(self, ticket_id: str, html_message: str,
-        group_id: int = None, tag: str = None,
-        status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved",
-        public: bool = True) -> str:
+    def reply_to(self, ticket_id: str, html_message: str, 
+                 group_id: str = None, tag: str = None,
+                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved",
+                 public: bool = True) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
         Args:
