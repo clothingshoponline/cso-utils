@@ -59,11 +59,8 @@ class Zendesk:
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
-    def get_ticket(self, id_number: str = None, ticket_id: str = None, ) -> Ticket:
+    def get_ticket(self, id_number: str = None) -> Ticket:
         """Use the Zendesk Tickets API to return a Ticket object with the given ticket ID."""
-        if id_number:  # used to convert depreciated id_number attribute to ticket_id
-            print("'id_number' argument is depreciated. Use 'ticket_id' instead.")
-            ticket_id = id_number
         response = requests.get(self._url + '/' + id_number, auth=self._auth)
         response.raise_for_status()
         return Ticket(response.json()['ticket'])
@@ -78,9 +75,9 @@ class Zendesk:
         """
         if zendesk_support_email:
             recipient_email = zendesk_support_email
-        ticket_id = self.create_ticket(customer_name,customer_email,subject,
-            html_message,assignee_email,
-            zendesk_support_email)
+        ticket_id = self.create_ticket(customer_name, customer_email, subject,
+            html_message, assignee_email,
+            recipient_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
@@ -117,60 +114,39 @@ class Zendesk:
         if zendesk_support_email:
             recipient_email = zendesk_support_email
         data = {"ticket": {"subject": subject,
-        "assignee_email": assignee_email,
-                "recipient": recipient,
-                "requester": {"name": customer_name,"email": customer_email,"verified": True},
-                "comment": {"html_body": html_message,"public": False},
-                "group_id": group_id,
-                "custom_fields": custom_fields,
-                "organization_id": organization_id,
-                "priority": priority,
-                "submitter_id": submitter_id,
-                "tags": tags,
-                "type": ticket_type,
-                "via": {"channel": via_channel}}}
+            "requester": {"name": customer_name, "email": customer_email, "verified": True},
+            "comment": {"html_body": html_message, "public": False},
+            "assignee_email": assignee_email,
+            "recipient": recipient_email,
+            "group_id": group_id,
+            "custom_fields": custom_fields,
+            "organization_id": organization_id,
+            "priority": priority,
+            "submitter_id": submitter_id,
+            "tags": tags,
+            "type": ticket_type,
+            "via": {"channel": via_channel}}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()["ticket"]["id"])
         return ticket_id
 
-    def send_to_customer(
-        self,
-        ticket_id: str,
-        html_message: str,
-        group_id: int = None,
-        tag: str = None
-        ) -> str:
-        """Depreciated, use "reply_to" method.
-        Send a message to the customer by replying to the given ticket.
+    def send_to_customer(self, ticket_id: str, html_message: str, 
+                         group_id: str = None, tag: str = None) -> str:
+        """Send a message to the customer by replying to the given ticket. 
         Mark it as Solved and return the ticket ID.
-        Uses the Zendesk POST /api/v2/tickets endpoint.
-        https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
-
-        Args:
-            ticket_id (str): The Zendesk ticket ID you want to reply to.
-            html_message (str): The comment formatted as HTML.
-            group_id (int): The group this ticket is assigned to
-            tag (str): The tag that will be applied to this ticket.
-
-        Returns:
-            str: The Zendesk ticket ID that was replied to.
         """
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
-    def reply_to(
-        self,
-        ticket_id: str,
-        html_message: str,
-        group_id: int = None,
-        tag: str = None,
+    def reply_to(self, ticket_id: str, html_message: str,
+        group_id: int = None, tag: str = None,
         status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved",
-        public: bool = True
-        ) -> str:
+        public: bool = True) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
         Args:
             tag (str): The tag that will be applied to the ticket. Multiple tags supported if passed in as a comma seperated string.
+                Example: "tag1" for single tag, or "tag1,tag2,tag3" for multiple tags.
 
         Returns:
             str: The Zendesk ticket ID that was replied to.
@@ -198,11 +174,11 @@ class Zendesk:
         response.raise_for_status()
 
         if "," in tag:
-            tag = tag.replace(" ", "").split(",")
+            tag_list = tag.replace(" ", "").split(",")
             response = requests.put(
                 self._url + f"/{ticket_id}/tags",
                 auth=self._auth,
-                json={'tags': tag}
+                json={'tags': tag_list}
             )
             response.raise_for_status()
         return ticket_id
