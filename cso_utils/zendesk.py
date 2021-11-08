@@ -59,7 +59,7 @@ class Zendesk:
         self._auth = (email + '/token', token)
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
-    def get_ticket(self, id_number: str = None) -> Ticket:
+    def get_ticket(self, id_number: str) -> Ticket:
         """Use the Zendesk Tickets API to return a Ticket object with the given ticket ID."""
         response = requests.get(self._url + '/' + id_number, auth=self._auth)
         response.raise_for_status()
@@ -72,8 +72,13 @@ class Zendesk:
         zendesk_support_email: str = None, recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
         send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
+        
+        Args:
+            zendesk_support_email: Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
         if zendesk_support_email:
+            print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
             html_message, assignee_email,
@@ -112,6 +117,7 @@ class Zendesk:
                 f"Ticket type not recognized. Please use one of the following options: {ticket_type_options}")
 
         if zendesk_support_email:
+            print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
         data = {"ticket": {"subject": subject,
             "requester": {"name": customer_name, "email": customer_email, "verified": True},
@@ -166,20 +172,14 @@ class Zendesk:
             }
         }
 
-        response = requests.put(
-            self._url + f"/{ticket_id}",
-            auth=self._auth,
-            json=data
-        )
+        response = requests.put(self._url + '/' + ticket_id, auth=self._auth,json=data)
         response.raise_for_status()
 
-        if "," in tag:
+        if tag is not None and "," in tag:
             tag_list = tag.replace(" ", "").split(",")
-            response = requests.put(
-                self._url + f"/{ticket_id}/tags",
-                auth=self._auth,
-                json={'tags': tag_list}
-            )
+            response = requests.put(self._url + '/' + ticket_id,
+            auth=self._auth,
+                json={'tags': tag_list})
             response.raise_for_status()
         return ticket_id
 
