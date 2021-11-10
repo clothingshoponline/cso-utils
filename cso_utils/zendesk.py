@@ -60,7 +60,7 @@ class Zendesk:
         self._url = f'https://{self._subdomain}.zendesk.com/api/v2/tickets'
 
     def get_ticket(self, id_number: str) -> Ticket:
-        """Use the Zendesk Tickets API to return a Ticket object with the given ticket ID."""
+        """Return a Ticket with the given id."""
         response = requests.get(self._url + '/' + id_number, auth=self._auth)
         response.raise_for_status()
         return Ticket(response.json()['ticket'])
