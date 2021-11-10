@@ -67,7 +67,7 @@ class Zendesk:
 
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
-                                           html_message: str, group_id: str = None,
+                                           html_message: str, group_id: int = None,
                                            tag: str = None, assignee_email: str = None, 
                                            zendesk_support_email: str = None, recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
@@ -91,21 +91,18 @@ class Zendesk:
                       zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
-                      custom_fields: list = None,
+                      custom_fields: [{"id": int, "value": "str"}] = None,
                       organization_id: int = None,
                       priority: ("urgent" or "high" or "normal" or "low") = None,
                       submitter_id: int = None,
-                      tags: list = None,
+                      tags: [str] = None,
                       ticket_type: ("problem" or "incident" or "question" or "task") = None,
-                      via_channel: str = None) -> str:
+                      via_channel: ("web_service" or "phone_call_inbound" or "chat") = None) -> str:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
             zendesk_support_email: Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
-            custom_fields: List of custom field ID and value pairs. Example: [{'id': custom_field_id, 'value': custome_field_value},{'id': custom_field_id, 'value': custome_field_value}]
-            tags: The array of tags applied to this ticket. Defaults to None.
-            via_channel: The via object tells you how or why an action or event was created. Defaults to None.
         """
         priority_options = ["urgent", "high", "normal", "low"]
         if priority and priority not in priority_options:
@@ -113,12 +110,16 @@ class Zendesk:
 
         ticket_type_options = ["problem", "incident", "question", "task"]
         if ticket_type and ticket_type not in ticket_type_options:
-            raise ValueError(
-                f"Ticket type not recognized. Please use one of the following options: {ticket_type_options}")
+            raise ValueError(f"Ticket type not recognized. Please use one of the following options: {ticket_type_options}")
 
+        via_channel_options = ["web_service", "phone_call_inbound", "chat"]
+        if via_channel and via_channel not in via_channel_options:
+            raise ValueError(f"Via Channel not recognized. Please use one of the following options: {via_channel_options}")
+
+        # "zendesk_support_email" variable will be removed in a future version. Use "recipient_email" instead.
         if zendesk_support_email:
-            print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
+
         data = {'ticket': {'subject': subject, 
                            'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
                            'comment': {'html_body': html_message, 'public': False}, 
@@ -138,25 +139,24 @@ class Zendesk:
         return ticket_id
 
     def send_to_customer(self, ticket_id: str, html_message: str, 
-                         group_id: str = None, tag: str = None) -> str:
+                         group_id: int = None, tag: str or [str] = None) -> str:
         """Send a message to the customer by replying to the given ticket. 
         Mark it as Solved and return the ticket ID.
         """
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
     def reply_to(self, ticket_id: str, html_message: str, 
-                 group_id: str = None, tag: str = None, 
+                 group_id: int = None, tag: str or [str] = None, 
                  status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
                  public: bool = True) -> str:
         """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
 
-        Args:
-            tag (str): The tag that will be applied to the ticket. Multiple tags supported if passed in as a comma seperated string.
-                Example: "tag1" for single tag, or "tag1,tag2,tag3" for multiple tags.
-
         Returns:
             str: The Zendesk ticket ID that was replied to.
         """
+        if group_id:
+            group_id = int(group_id)
+
         status_options = ["new", "open", "pending", "hold", "solved", "closed"]
         if status not in status_options:
             raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
@@ -172,15 +172,18 @@ class Zendesk:
             }
         }
 
-        response = requests.put(self._url + '/' + ticket_id, auth=self._auth, json=data)
+        response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
+                                json=data)
         response.raise_for_status()
 
-        if tag is not None and "," in tag:
-            tag_list = tag.replace(" ", "").split(",")
-            response = requests.put(self._url + '/' + ticket_id,
-            auth=self._auth,
-                json={'tags': tag_list})
+        if tag:
+            if type(tag) == str:
+                tag = [tag]
+            response = requests.put(self._url + '/' + ticket_id + '/tags', 
+                                    auth=self._auth, 
+                                    json={'tags': tag})
             response.raise_for_status()
+
         return ticket_id
 
     def tickets_created_between_today_and(self, month: int, day: int, year: int) -> [Ticket]:
