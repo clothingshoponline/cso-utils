@@ -78,7 +78,6 @@ class Zendesk:
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
         if zendesk_support_email:
-            print("'zendesk_support_email' attribute is depreciated. Please use 'recipient_email'")
             recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
                                        html_message, assignee_email, 
