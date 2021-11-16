@@ -1,6 +1,6 @@
 import datetime
 import time
-
+import warnings
 import requests
 
 from . import stored_data
@@ -74,14 +74,15 @@ class Zendesk:
         send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
         
         Args:
-            zendesk_support_email: Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
         if zendesk_support_email:
+            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
             recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
                                        html_message, assignee_email, 
-                                       recipient_email)
+                                       recipient_email=recipient_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
@@ -90,7 +91,7 @@ class Zendesk:
                       zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
-                      custom_fields: [{"id": int, "value": "str"}] = None,
+                      custom_fields: [{"id": int, "value": str}] = None,
                       organization_id: int = None,
                       priority: ("urgent" or "high" or "normal" or "low") = None,
                       submitter_id: int = None,
@@ -100,7 +101,7 @@ class Zendesk:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
-            zendesk_support_email: Depreciated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            zendesk_support_email: Deprecated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
         priority_options = ["urgent", "high", "normal", "low"]
@@ -115,8 +116,8 @@ class Zendesk:
         if via_channel and via_channel not in via_channel_options:
             raise ValueError(f"Via Channel not recognized. Please use one of the following options: {via_channel_options}")
 
-        # "zendesk_support_email" variable will be removed in a future version. Use "recipient_email" instead.
         if zendesk_support_email:
+            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
             recipient_email = zendesk_support_email
 
         data = {'ticket': {'subject': subject, 
@@ -148,7 +149,7 @@ class Zendesk:
                  group_id: int = None, tag: str or [str] = None, 
                  status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
                  public: bool = True) -> str:
-        """Reply to the given ticket and return the ticket ID. Use "public" argument to control public vs internal comment.
+        """Reply to the given ticket. Use "public" argument to control public vs internal comment.
 
         Returns:
             str: The Zendesk ticket ID that was replied to.
