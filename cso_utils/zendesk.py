@@ -88,16 +88,21 @@ class Zendesk:
 
     def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
                       html_message: str, assignee_email: str = None, 
+                      assignee_id: int = None,
                       zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
+                      status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
                       custom_fields: [{"id": int, "value": str}] = None,
                       organization_id: int = None,
                       priority: ("urgent" or "high" or "normal" or "low") = None,
                       submitter_id: int = None,
                       tags: [str] = None,
                       ticket_type: ("problem" or "incident" or "question" or "task") = None,
-                      via_channel: ("web_service" or "phone_call_inbound" or "chat") = None) -> str:
+                      via_channel: ("web_service" or "phone_call_inbound" or "voicemail" or "chat" or "facebook_message") = None,
+                      due_at: str = None,
+
+                      ) -> str:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
@@ -124,15 +129,18 @@ class Zendesk:
                            'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
                            'comment': {'html_body': html_message, 'public': False}, 
                            'assignee_email': assignee_email, 
+                           'assignee_id': assignee_id, 
                            'recipient': recipient_email, 
                            'group_id': group_id, 
+                           'status': status,
                            'custom_fields': custom_fields, 
                            'organization_id': organization_id, 
                            'priority': priority, 
                            'submitter_id': submitter_id, 
                            'tags': tags, 
                            'type': ticket_type, 
-                           'via': {'channel': via_channel}}}
+                           'via': {'channel': via_channel},
+                           'due_at': due_at}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()['ticket']['id'])
