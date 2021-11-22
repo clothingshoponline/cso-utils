@@ -92,7 +92,7 @@ class Zendesk:
                       zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
-                      status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
+                      status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = None, 
                       custom_fields: [{"id": int, "value": str}] = None,
                       organization_id: int = None,
                       priority: ("urgent" or "high" or "normal" or "low") = None,
@@ -100,15 +100,19 @@ class Zendesk:
                       tags: [str] = None,
                       ticket_type: ("problem" or "incident" or "question" or "task") = None,
                       via_channel: ("web_service" or "phone_call_inbound" or "voicemail" or "chat" or "facebook_message") = None,
-                      due_at: str = None,
+                      due_at: "YYYY-MM-DD" = None,
 
                       ) -> str:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
-            zendesk_support_email: Deprecated, use "recipient" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
+        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
+        if status and status not in status_options:
+            raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
+
         priority_options = ["urgent", "high", "normal", "low"]
         if priority and priority not in priority_options:
             raise ValueError(f"Priority not recognized. Please use one of the following options: {priority_options}")
