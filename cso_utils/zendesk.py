@@ -1,6 +1,6 @@
 import datetime
 import time
-
+import warnings
 import requests
 
 from . import stored_data
@@ -51,6 +51,9 @@ class Ticket(stored_data.StoredData):
                 and self._data['via']['source']['from']['address'] == email)
 
 class Zendesk:
+    """Used to interact with the Zendesk Tickets API.
+    https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/
+    """
     def __init__(self, subdomain: str, email: str, token: str):
         self._subdomain = subdomain
         self._auth = (email + '/token', token)
@@ -64,56 +67,134 @@ class Zendesk:
 
     def create_ticket_and_send_to_customer(self, customer_name: str, 
                                            customer_email: str, subject: str, 
-                                           html_message: str, group_id: str = None,
+                                           html_message: str, group_id: int = None,
                                            tag: str = None, assignee_email: str = None, 
-                                           zendesk_support_email: str = None) -> str:
-        """Create a new ticket and send the message to the customer. 
-        Return the ID of the new ticket. 
+                                           zendesk_support_email: str = None, recipient_email: str = None) -> str:
+        """Create a new ticket with private internal "html_message" and
+        send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
+        
+        Args:
+            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
+        if zendesk_support_email:
+            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
+            recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
                                        html_message, assignee_email, 
-                                       zendesk_support_email)
+                                       recipient_email=recipient_email)
         ticket_id = self.send_to_customer(ticket_id, html_message, group_id, tag)
         return ticket_id
 
     def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
                       html_message: str, assignee_email: str = None, 
-                      zendesk_support_email: str = None) -> str:
-        """Create a new ticket. Return ticket ID."""
+                      assignee_id: int = None,
+                      zendesk_support_email: str = None,
+                      recipient_email: str = None,
+                      group_id: int = None,
+                      status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = None, 
+                      custom_fields: [{"id": int, "value": str}] = None,
+                      organization_id: int = None,
+                      priority: ("urgent" or "high" or "normal" or "low") = None,
+                      submitter_id: int = None,
+                      tags: [str] = None,
+                      ticket_type: ("problem" or "incident" or "question" or "task") = None,
+                      via_channel: ("web_service" or "phone_call_inbound" or "voicemail" or "chat" or "facebook_message") = None,
+                      due_at: "YYYY-MM-DD" = None,
+
+                      ) -> str:
+        """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
+
+        Args:
+            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
+            recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
+        """
+        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
+        if status and status not in status_options:
+            raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
+
+        priority_options = ["urgent", "high", "normal", "low"]
+        if priority and priority not in priority_options:
+            raise ValueError(f"Priority not recognized. Please use one of the following options: {priority_options}")
+
+        ticket_type_options = ["problem", "incident", "question", "task"]
+        if ticket_type and ticket_type not in ticket_type_options:
+            raise ValueError(f"Ticket type not recognized. Please use one of the following options: {ticket_type_options}")
+
+        via_channel_options = ["web_service", "phone_call_inbound", "chat"]
+        if via_channel and via_channel not in via_channel_options:
+            raise ValueError(f"Via Channel not recognized. Please use one of the following options: {via_channel_options}")
+
+        if zendesk_support_email:
+            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
+            recipient_email = zendesk_support_email
+
         data = {'ticket': {'subject': subject, 
                            'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
-                           'comment': {'html_body': html_message, 'public': False}}}
-        if assignee_email:
-            data['ticket']['assignee_email'] = assignee_email
-        if zendesk_support_email:
-            data['ticket']['recipient'] = zendesk_support_email
+                           'comment': {'html_body': html_message, 'public': False}, 
+                           'assignee_email': assignee_email, 
+                           'assignee_id': assignee_id, 
+                           'recipient': recipient_email, 
+                           'group_id': group_id, 
+                           'status': status,
+                           'custom_fields': custom_fields, 
+                           'organization_id': organization_id, 
+                           'priority': priority, 
+                           'submitter_id': submitter_id, 
+                           'tags': tags, 
+                           'type': ticket_type, 
+                           'via': {'channel': via_channel},
+                           'due_at': due_at}}
         response = requests.post(self._url, auth=self._auth, json=data)
         response.raise_for_status()
         ticket_id = str(response.json()['ticket']['id'])
         return ticket_id
 
     def send_to_customer(self, ticket_id: str, html_message: str, 
-                         group_id: str = None, tag: str = None) -> str:
+                         group_id: int = None, tag: str or [str] = None) -> str:
         """Send a message to the customer by replying to the given ticket. 
         Mark it as Solved and return the ticket ID.
         """
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
     def reply_to(self, ticket_id: str, html_message: str, 
-                 group_id: str = None, tag: str = None, 
-                 status: str = 'solved', public: bool = True) -> str:
-        """Reply to the given ticket and return the ticket ID."""
-        data = {'comment': {'html_body': html_message, 'public': public}, 
-                'status': status}
+                 group_id: int = None, tag: str or [str] = None, 
+                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
+                 public: bool = True) -> str:
+        """Reply to the given ticket. Use "public" argument to control public vs internal comment.
+
+        Returns:
+            str: The Zendesk ticket ID that was replied to.
+        """
         if group_id:
-            data['group_id'] = int(group_id)
+            group_id = int(group_id)
+
+        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
+        if status not in status_options:
+            raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
+
+        data = {
+            "ticket": {
+                "group_id": group_id,
+                "comment": {
+                    "html_body": html_message,
+                    "public": public
+                },
+                "status": status,
+            }
+        }
+
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
-                                json={'ticket': data})
+                                json=data)
         response.raise_for_status()
-        response = requests.put(self._url + '/' + ticket_id + '/tags', 
-                                auth=self._auth, 
-                                json={'tags': [tag]})
-        response.raise_for_status()
+
+        if tag:
+            if type(tag) == str:
+                tag = [tag]
+            response = requests.put(self._url + '/' + ticket_id + '/tags', 
+                                    auth=self._auth, 
+                                    json={'tags': tag})
+            response.raise_for_status()
 
         return ticket_id
 
