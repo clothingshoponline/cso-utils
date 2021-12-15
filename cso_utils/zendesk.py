@@ -157,11 +157,15 @@ class Zendesk:
         """
         return self.reply_to(ticket_id, html_message, group_id, tag)
 
-    def reply_to(self, ticket_id: str, html_message: str, 
+    def reply_to(self, 
+                 ticket_id: str, 
+                 html_message: str, 
                  group_id: int = None, tag: str or [str] = None, 
                  status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
-                 public: bool = True) -> str:
+                 public: bool = True,
+                 custom_fields: dict = None) -> str:
         """Reply to the given ticket. Use "public" argument to control public vs internal comment.
+        custom_fields should be a dict where {field id: field value}.
 
         Returns:
             str: The Zendesk ticket ID that was replied to.
@@ -181,6 +185,7 @@ class Zendesk:
                     "public": public
                 },
                 "status": status,
+                "custom_fields": [{"id": key, "value": value} for key, value in custom_fields.items()]
             }
         }
 
