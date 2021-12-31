@@ -177,6 +177,8 @@ class Zendesk:
         if status not in status_options:
             raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
 
+        if custom_fields:
+            custom_fields = [{"id": key, "value": value} for key, value in custom_fields.items()]
         data = {
             "ticket": {
                 "group_id": group_id,
@@ -185,7 +187,7 @@ class Zendesk:
                     "public": public
                 },
                 "status": status,
-                "custom_fields": [{"id": key, "value": value} for key, value in custom_fields.items()]
+                "custom_fields": custom_fields
             }
         }
 
