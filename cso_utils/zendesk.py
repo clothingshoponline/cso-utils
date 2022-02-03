@@ -171,25 +171,23 @@ class Zendesk:
         Returns:
             str: The Zendesk ticket ID that was replied to.
         """
+        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
+        if status not in status_options:
+            raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
+
         data = {
             "ticket": {
                 "comment": {
                     "html_body": html_message,
                     "public": public
-                }
+                },
+                "status": status
             }
         }
 
         if group_id:
             group_id = int(group_id)
             data["ticket"]["group_id"] = group_id
-
-        status_options = ["new", "open", "pending", "hold", "solved", "closed"]
-        if status:
-            if status not in status_options:
-                raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
-            else:
-                data["ticket"]["status"] = status
 
         if custom_fields:
             custom_fields = [{"id": key, "value": value} for key, value in custom_fields.items()]
