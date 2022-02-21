@@ -69,17 +69,13 @@ class Zendesk:
                                            customer_email: str, subject: str, 
                                            html_message: str, group_id: int = None,
                                            tag: str = None, assignee_email: str = None, 
-                                           zendesk_support_email: str = None, recipient_email: str = None) -> str:
+                                           recipient_email: str = None) -> str:
         """Create a new ticket with private internal "html_message" and
         send a public comment using "html_message" to the customer. Returns the ID of the new ticket.
         
         Args:
-            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
-        if zendesk_support_email:
-            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
-            recipient_email = zendesk_support_email
         ticket_id = self.create_ticket(customer_name, customer_email, subject,
                                        html_message, assignee_email, 
                                        recipient_email=recipient_email)
@@ -89,7 +85,6 @@ class Zendesk:
     def create_ticket(self, customer_name: str, customer_email: str, subject: str, 
                       html_message: str, assignee_email: str = None, 
                       assignee_id: int = None,
-                      zendesk_support_email: str = None,
                       recipient_email: str = None,
                       group_id: int = None,
                       status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = None, 
@@ -106,7 +101,6 @@ class Zendesk:
         """Create a new ticket using the Zendesk Tickets endpoint. Returns the ticket ID.
 
         Args:
-            zendesk_support_email: Deprecated, use "recipient_email" attribute. The original recipient e-mail address of the ticket. Defaults to None.
             recipient_email: The original recipient e-mail address of the ticket. Defaults to None.
         """
         status_options = ["new", "open", "pending", "hold", "solved", "closed"]
@@ -124,10 +118,6 @@ class Zendesk:
         via_channel_options = ["web_service", "phone_call_inbound", "chat"]
         if via_channel and via_channel not in via_channel_options:
             raise ValueError(f"Via Channel not recognized. Please use one of the following options: {via_channel_options}")
-
-        if zendesk_support_email:
-            warnings.warn("'zendesk_support_email' variable will be removed in a future version. Use 'recipient_email' instead.", DeprecationWarning)
-            recipient_email = zendesk_support_email
 
         data = {'ticket': {'subject': subject, 
                            'requester': {'name': customer_name, 'email': customer_email, 'verified': True}, 
