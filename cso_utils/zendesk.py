@@ -170,18 +170,12 @@ class Zendesk:
         Returns:
             str: The Zendesk ticket ID that was replied to.
         """
-        if group_id:
-            group_id = int(group_id)
-
         status_options = ["new", "open", "pending", "hold", "solved", "closed"]
         if status and status not in status_options:
             raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
 
-        if custom_fields:
-            custom_fields = [{"id": key, "value": value} for key, value in custom_fields.items()]
         data = {
             "ticket": {
-                "group_id": group_id,
                 "comment": {
                     "html_body": html_message,
                     "public": public
@@ -192,8 +186,15 @@ class Zendesk:
         if status:
             data['ticket']['status'] = status
 
-        response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
-                                json=data)
+        if group_id:
+            group_id = int(group_id)
+            data["ticket"]["group_id"] = group_id
+
+        if custom_fields:
+            custom_fields = [{"id": key, "value": value} for key, value in custom_fields.items()]
+            data["ticket"]["custom_fields"] = custom_fields
+
+        response = requests.put(self._url + '/' + ticket_id, auth=self._auth, json=data)
         response.raise_for_status()
 
         if tag:
@@ -205,6 +206,7 @@ class Zendesk:
             response.raise_for_status()
 
         return ticket_id
+
 
     def tickets_created_between_today_and(self, month: int, day: int, year: int) -> [Ticket]:
         """Return a list of Ticket objects representing tickets created during the 
