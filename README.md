@@ -1,4 +1,4 @@
-# cso-utils v5.4.0
+# cso-utils v6.0.0
 
 This package contains wrappers for commonly used API calls from the S&S Activewear, Github, ChannelAdvisor, and Zendesk APIs.
 
@@ -14,7 +14,7 @@ This package contains wrappers for commonly used API calls from the S&S Activewe
 ## Installation
 
 ```
-pip install git+https://github.com/clothingshoponline/cso-utils.git@v5.4.0
+pip install git+https://github.com/clothingshoponline/cso-utils.git@v6.0.0
 ```
 
 ## Usage
