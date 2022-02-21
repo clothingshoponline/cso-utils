@@ -161,7 +161,7 @@ class Zendesk:
                  ticket_id: str, 
                  html_message: str, 
                  group_id: int = None, tag: str or [str] = None, 
-                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = "solved", 
+                 status: ("new" or "open" or "pending" or "hold" or "solved" or "closed") = None, 
                  public: bool = True,
                  custom_fields: dict = None) -> str:
         """Reply to the given ticket. Use "public" argument to control public vs internal comment.
@@ -174,7 +174,7 @@ class Zendesk:
             group_id = int(group_id)
 
         status_options = ["new", "open", "pending", "hold", "solved", "closed"]
-        if status not in status_options:
+        if status and status not in status_options:
             raise ValueError(f"Status not recognized. Please use one of the following options: {status_options}")
 
         if custom_fields:
@@ -186,10 +186,11 @@ class Zendesk:
                     "html_body": html_message,
                     "public": public
                 },
-                "status": status,
                 "custom_fields": custom_fields
             }
         }
+        if status:
+            data['ticket']['status'] = status
 
         response = requests.put(self._url + '/' + ticket_id, auth=self._auth, 
                                 json=data)
